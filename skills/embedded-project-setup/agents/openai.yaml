@@ -1,0 +1,4 @@
+interface:
+  display_name: "Embedded Project Setup"
+  short_description: "Scaffold modern C embedded projects"
+  default_prompt: "Use $embedded-project-setup to create a modern STM32 embedded C project with CMake, Ninja, clangd, clang-tidy, OpenOCD, and CI-ready structure."
