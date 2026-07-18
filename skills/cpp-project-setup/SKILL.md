@@ -22,10 +22,10 @@ Prefer project-local, repeatable setup over global machine assumptions. Use the 
    - For existing work, inspect `CMakeLists.txt`, `CMakePresets.json`, `vcpkg.json`, `.vscode/`, `.clangd`, `.clang-format`, `.clang-tidy`, CI files, and local docs before editing.
 
 2. Generate or update the project.
-   - For greenfield scaffolding, run:
+   - For greenfield scaffolding, run from this skill directory:
 
 ```bash
-python3 /Users/wan/.codex/skills/cpp-project-setup/scripts/scaffold_cpp_project.py \
+python3 scripts/scaffold_cpp_project.py \
   --name my_app \
   --out /path/to/workspace/my_app
 ```

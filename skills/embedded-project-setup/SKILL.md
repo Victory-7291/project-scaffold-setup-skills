@@ -22,10 +22,10 @@ Treat editor analysis, static checks, build generation, cross compilation, flash
    - If unspecified, default to a minimal STM32G030C8T6 smoke project: Cortex-M0+, 64 KiB flash, 8 KiB RAM, ST-Link, OpenOCD target `stm32g0x`.
 
 2. Generate or update the project.
-   - For greenfield scaffolding, run:
+   - For greenfield scaffolding, run from this skill directory:
 
 ```bash
-python3 /Users/wan/.codex/skills/embedded-project-setup/scripts/scaffold_embedded_project.py \
+python3 scripts/scaffold_embedded_project.py \
   --name firmware \
   --out /path/to/workspace/firmware
 ```

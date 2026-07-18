@@ -15,7 +15,34 @@
 | --- | --- | --- |
 | `cpp-project-setup` | 创建或现代化 C++/CMake/vcpkg 项目，包含 VS Code、CMake Presets、GoogleTest、clangd、clang-format、clang-tidy、Doxygen 等基础设施。 | `skills/cpp-project-setup/SKILL.md` |
 | `embedded-project-setup` | 创建或现代化 STM32/Cortex-M 嵌入式 C 项目，包含 CMake、Ninja、arm-none-eabi、OpenOCD、Cortex-Debug、固件产物和基础 CI 结构。 | `skills/embedded-project-setup/SKILL.md` |
-| `template-skill` | 新 skill 的最小模板。 | `template/SKILL.md` |
+
+## 安装
+
+列出仓库中可安装的 skills：
+
+```bash
+npx skills add Victory-7291/project-scaffold-setup-skills --list
+```
+
+安装 C++ 项目脚手架 skill：
+
+```bash
+npx skills add Victory-7291/project-scaffold-setup-skills \
+  --skill cpp-project-setup
+```
+
+安装嵌入式项目脚手架 skill：
+
+```bash
+npx skills add Victory-7291/project-scaffold-setup-skills \
+  --skill embedded-project-setup
+```
+
+也可以一次安装仓库里的全部正式 skills：
+
+```bash
+npx skills add Victory-7291/project-scaffold-setup-skills
+```
 
 ## 仓库结构
 
@@ -23,8 +50,7 @@
 .
 ├── README.md
 ├── AGENTS.md
-├── template/
-│   └── SKILL.md
+├── LICENSE
 └── skills/
     ├── cpp-project-setup/
     │   ├── SKILL.md
@@ -99,7 +125,7 @@ python3 skills/embedded-project-setup/scripts/scaffold_embedded_project.py \
 
 ## 新增 Skill 流程
 
-1. 从 `template/SKILL.md` 复制出新的 `skills/<skill-name>/SKILL.md`。
+1. 新建 `skills/<skill-name>/SKILL.md`，可参考已有 skill 的结构，但不要保留占位模板作为可安装 skill。
 2. 写清楚 frontmatter 中的 `name` 和 `description`。
 3. 在 `SKILL.md` 中定义 agent 的判断逻辑、默认方案、生成流程和验证步骤。
 4. 如需生成项目文件，添加 `scripts/` 下的脚手架脚本，并保持可重复、可参数化。
@@ -114,3 +140,7 @@ python3 skills/embedded-project-setup/scripts/scaffold_embedded_project.py \
 - 参考文档可以详细，`SKILL.md` 要可快速执行。
 - 改已有 skill 前先读它的 `SKILL.md`、`references/` 和 `scripts/`。
 - 验证失败或依赖缺失时，在结果中明确说明跳过了什么、为什么跳过。
+
+## License
+
+MIT License. 这个许可证允许他人自由使用、修改、分发和集成这些 skills，只要求保留版权和许可证声明。
