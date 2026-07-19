@@ -1,6 +1,6 @@
 ---
 name: embedded-project-setup
-description: Set up modern C or STM32/Cortex-M embedded projects from scratch with VS Code, clangd, clang-format, clang-tidy, CMakePresets.json, Ninja, arm-none-eabi-gcc, arm-none-eabi-gdb, firmware ELF/BIN/HEX outputs, OpenOCD, ST-Link or J-Link, Cortex-Debug, Docker/GitHub Actions, and layered CMSIS/HAL/LL/bare-metal structure. Use when Codex is asked to bootstrap, standardize, or modernize embedded firmware; create CMake toolchains, VS Code Cortex-Debug configs, flashing/debug scripts, linker/startup files, or embedded CI.
+description: Set up or modernize STM32/Cortex-M embedded C firmware projects with VS Code, clangd, clang-format, clang-tidy, CMakePresets.json, Ninja, arm-none-eabi-gcc/gdb, firmware ELF/BIN/HEX/MAP outputs, OpenOCD, ST-Link or J-Link, Cortex-Debug, Docker/GitHub Actions, and layered CMSIS/HAL/LL/bare-metal structure. Use when Codex is asked to bootstrap, standardize, or modernize MCU firmware; create cross CMake toolchains, VS Code Cortex-Debug configs, flashing/debug scripts, linker/startup files, BSP smoke code, or embedded CI. Prefer cpp-project-setup for host-side C++ app/library projects.
 ---
 
 # Modern Embedded Project Setup
@@ -42,6 +42,7 @@ python3 scripts/scaffold_embedded_project.py \
    - Use CMake presets for `stm32-debug`, `stm32-release`, and `stm32-analyze`.
    - Use a `cmake/arm-none-eabi-gcc.cmake` toolchain file.
    - Export `compile_commands.json` for clangd.
+   - Pass the embedded target triple to clangd and clang-tidy so host LLVM tools understand ARM CPU flags.
    - Use Ninja for builds.
    - Produce `.elf`, `.bin`, `.hex`, `.map`, and size output.
 
@@ -49,7 +50,7 @@ python3 scripts/scaffold_embedded_project.py \
    - Recommend VS Code extensions: clangd, CMake Tools, Cortex-Debug.
    - Disable competing IntelliSense when clangd owns semantic analysis.
    - Use OpenOCD with ST-Link or J-Link as the GDB server.
-   - Keep `scripts/build.sh`, `scripts/analyze.sh`, `scripts/flash.sh`, and `scripts/openocd_server.sh` as simple command-line entry points.
+   - Keep `scripts/build.sh`, `scripts/format.sh`, `scripts/analyze.sh`, `scripts/flash.sh`, and `scripts/openocd_server.sh` as simple command-line entry points.
 
 ## Validation
 
@@ -58,6 +59,7 @@ Run what is available locally:
 ```bash
 cmake --preset stm32-debug
 cmake --build --preset stm32-debug
+bash scripts/format.sh --check
 cmake --preset stm32-analyze
 cmake --build --preset stm32-analyze
 ```
@@ -69,7 +71,7 @@ bash scripts/flash.sh
 bash scripts/openocd_server.sh
 ```
 
-If `arm-none-eabi-gcc`, OpenOCD, or hardware is unavailable, report the skipped step and leave the project ready for that tool.
+If `clang-format`, `clang-tidy`, `arm-none-eabi-gcc`, OpenOCD, or hardware is unavailable, report the skipped step and leave the project ready for that tool.
 
 ## References
 

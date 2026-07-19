@@ -59,6 +59,7 @@ firmware/
     <mcu>_flash.ld
   scripts/
     build.sh
+    format.sh
     analyze.sh
     flash.sh
     openocd_server.sh
@@ -101,13 +102,15 @@ Application
 - Produce `.elf`, `.bin`, `.hex`, `.map`, and `arm-none-eabi-size` output after build.
 - Keep `stm32-debug`, `stm32-release`, and `stm32-analyze` presets.
 - Enable clang-tidy only in the analyze preset or behind an option.
+- Pass `--target=arm-none-eabi` into clangd and clang-tidy when using cross GCC flags, otherwise host LLVM tools may reject Cortex-M CPU options.
+- Suppress default clang-tidy checks that are noisy for linker symbols and memory-mapped registers; keep project logic checks enabled.
 - A minimal smoke firmware can use `-nostdlib` and avoid C library headers. When the project starts using libc, printf, HAL code that expects standard headers, or syscalls, add the matching newlib/runtime package and switch linker specs deliberately.
 
 ## Debug and Flash Decisions
 
 - Use OpenOCD as the bridge between GDB and ST-Link/J-Link.
 - Use Cortex-Debug in VS Code for interactive debug.
-- Keep CLI scripts for build, analyze, flash, and OpenOCD server startup.
+- Keep CLI scripts for build, format, analyze, flash, and OpenOCD server startup.
 - Run flash/debug commands only when hardware is attached and the user expects hardware access.
 - If flashing fails, check power, SWD wiring, OpenOCD target file, probe interface file, and SWD speed.
 
@@ -115,6 +118,7 @@ Application
 
 - Use Docker to pin GCC, CMake, Ninja, OpenOCD, clang-format, and clang-tidy versions.
 - Trigger CI on firmware paths, workflow paths, and toolchain files.
+- Run formatting and analyze checks before the artifact-producing debug build.
 - Upload `.elf`, `.bin`, `.hex`, and `.map` artifacts.
 - Add host-side unit tests later for portable modules; do not block initial MCU bring-up on a test harness unless requested.
 

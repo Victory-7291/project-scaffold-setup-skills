@@ -54,6 +54,7 @@ def main() -> int:
     parser.add_argument("--mcu", default="stm32g030c8t6", help="MCU name used in docs and VS Code")
     parser.add_argument("--device-define", default="STM32G030xx", help="Preprocessor define for vendor headers")
     parser.add_argument("--cpu", default="cortex-m0plus", help="GCC -mcpu value")
+    parser.add_argument("--clang-target", default="arm-none-eabi", help="Target triple passed to clangd/clang-tidy")
     parser.add_argument("--fpu", default="", help="Optional GCC -mfpu value, for example fpv4-sp-d16")
     parser.add_argument("--float-abi", default="", help="Optional GCC -mfloat-abi value, for example hard")
     parser.add_argument("--flash-kb", type=int, default=64, help="Flash size for generated linker script")
@@ -83,6 +84,7 @@ def main() -> int:
         "MCU_UPPER": args.mcu.upper(),
         "DEVICE_DEFINE": args.device_define,
         "CPU": args.cpu,
+        "CLANG_TARGET": args.clang_target,
         "CPU_FLAGS": cmake_list(cpu_flags, indent="  "),
         "FLASH_KB": str(args.flash_kb),
         "RAM_KB": str(args.ram_kb),
@@ -114,7 +116,10 @@ def main() -> int:
 
             if(@UPPER@_ENABLE_CLANG_TIDY)
               find_program(CLANG_TIDY_EXE NAMES clang-tidy REQUIRED)
-              set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY_EXE}")
+              set(CMAKE_C_CLANG_TIDY
+                "${CLANG_TIDY_EXE}"
+                "--extra-arg-before=--target=@CLANG_TARGET@"
+              )
             endif()
 
             add_executable(${FIRMWARE_TARGET})
@@ -379,8 +384,7 @@ def main() -> int:
 
             void SystemInit(void) {}
 
-            __attribute__((section(".isr_vector"), used))
-            const uintptr_t g_pfnVectors[] = {
+            __attribute__((section(".isr_vector"), used)) const uintptr_t g_pfnVectors[] = {
                 (uintptr_t)&_estack,
                 (uintptr_t)Reset_Handler,
                 (uintptr_t)NMI_Handler,
@@ -400,13 +404,13 @@ def main() -> int:
             };
 
             void Reset_Handler(void) {
-              uint32_t* src = &_sidata;
-              for (uint32_t* dst = &_sdata; dst < &_edata; ++dst) {
+              uint32_t *src = &_sidata;
+              for (uint32_t *dst = &_sdata; dst < &_edata; ++dst) {
                 *dst = *src;
                 ++src;
               }
 
-              for (uint32_t* dst = &_sbss; dst < &_ebss; ++dst) {
+              for (uint32_t *dst = &_sbss; dst < &_ebss; ++dst) {
                 *dst = 0u;
               }
 
@@ -512,6 +516,7 @@ def main() -> int:
               "clangd.arguments": [
                 "--background-index",
                 "--clang-tidy",
+                "--query-driver=**/arm-none-eabi-*",
                 "--compile-commands-dir=${workspaceFolder}/build/@CLANGD_PRESET@"
               ]
             }
@@ -546,6 +551,8 @@ def main() -> int:
             """
             CompileFlags:
               CompilationDatabase: build/@CLANGD_PRESET@
+              Add:
+                - --target=@CLANG_TARGET@
             Diagnostics:
               ClangTidy: true
             """,
@@ -569,11 +576,48 @@ def main() -> int:
               clang-analyzer-*,
               performance-*,
               readability-*,
+              -bugprone-reserved-identifier,
+              -clang-analyzer-core.FixedAddressDereference,
+              -clang-analyzer-security.ArrayBound,
+              -performance-no-int-to-ptr,
               -readability-magic-numbers,
-              -readability-isolate-declaration
+              -readability-isolate-declaration,
+              -readability-redundant-casting,
+              -readability-uppercase-literal-suffix
             WarningsAsErrors: ''
             HeaderFilterRegex: '.*'
             FormatStyle: file
+            """,
+            **values,
+        ),
+        "scripts/format.sh": render(
+            """
+            #!/usr/bin/env bash
+            set -euo pipefail
+
+            ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+            MODE="${1:-fix}"
+
+            if ! command -v clang-format >/dev/null 2>&1; then
+              echo "clang-format is required" >&2
+              exit 1
+            fi
+
+            FILES=()
+            while IFS= read -r -d '' file; do
+              FILES+=("${file}")
+            done < <(find "${ROOT_DIR}/include" "${ROOT_DIR}/src" "${ROOT_DIR}/startup" \
+              -type f \\( -name '*.h' -o -name '*.c' \\) -print0)
+
+            if [ "${#FILES[@]}" -eq 0 ]; then
+              exit 0
+            fi
+
+            if [ "${MODE}" = "--check" ] || [ "${MODE}" = "check" ]; then
+              clang-format --dry-run --Werror "${FILES[@]}"
+            else
+              clang-format -i "${FILES[@]}"
+            fi
             """,
             **values,
         ),
@@ -693,6 +737,10 @@ def main() -> int:
                   - uses: actions/checkout@v4
                   - name: Build toolchain image
                     run: docker build -t @TARGET@-toolchain .
+                  - name: Check formatting
+                    run: docker run --rm -v "${{ github.workspace }}:/work" -w /work @TARGET@-toolchain bash scripts/format.sh --check
+                  - name: Analyze firmware
+                    run: docker run --rm -v "${{ github.workspace }}:/work" -w /work @TARGET@-toolchain bash scripts/analyze.sh
                   - name: Build firmware
                     run: docker run --rm -v "${{ github.workspace }}:/work" -w /work @TARGET@-toolchain bash scripts/build.sh
                   - name: Upload firmware artifacts
@@ -750,6 +798,12 @@ def main() -> int:
             bash scripts/analyze.sh
             ```
 
+            ## Format
+
+            ```bash
+            bash scripts/format.sh --check
+            ```
+
             ## Flash and Debug
 
             ```bash
@@ -766,6 +820,7 @@ def main() -> int:
 
     executable_files = {
         "scripts/build.sh",
+        "scripts/format.sh",
         "scripts/analyze.sh",
         "scripts/flash.sh",
         "scripts/openocd_server.sh",

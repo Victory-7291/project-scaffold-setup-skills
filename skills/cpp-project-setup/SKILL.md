@@ -1,6 +1,6 @@
 ---
 name: cpp-project-setup
-description: Set up modern C++ projects from scratch with Git/GitHub, VS Code, CMake Tools, clangd, CodeLLDB or Windows C/C++ debugging, CMakePresets.json, vcpkg manifest mode, platform triplets, Ninja, Clang/GCC/MSVC, GoogleTest, clang-format, clang-tidy, Doxygen, and CI-ready structure. Use when Codex is asked to bootstrap, standardize, or modernize a C++ CMake project; create VS Code C++ settings; add vcpkg/CMake presets; establish tests, linting, formatting, documentation, or a reproducible developer workflow.
+description: Set up or modernize host-side C++ CMake projects with Git/GitHub, VS Code, CMake Tools, clangd, CodeLLDB on macOS/Linux, cppvsdbg on Windows, CMakePresets.json, vcpkg manifest mode, platform triplets, Ninja, Clang/GCC/MSVC, GoogleTest, clang-format, clang-tidy, Doxygen, and CI-ready structure. Use when Codex is asked to bootstrap, standardize, or modernize a C++ app/library; create VS Code C++ settings; add vcpkg/CMake presets; establish tests, linting, formatting, docs, or a reproducible developer workflow. Prefer embedded-project-setup for MCU firmware, OpenOCD, startup/linker scripts, arm-none-eabi, or Cortex-Debug tasks.
 ---
 
 # Modern C++ Project Setup
@@ -20,6 +20,7 @@ Prefer project-local, repeatable setup over global machine assumptions. Use the 
 1. Determine whether the task is greenfield or an existing project.
    - For greenfield work, default to an app plus reusable library target, C++20, Ninja, vcpkg manifest mode, GoogleTest, clang-format, clang-tidy, Doxygen, and VS Code settings.
    - For existing work, inspect `CMakeLists.txt`, `CMakePresets.json`, `vcpkg.json`, `.vscode/`, `.clangd`, `.clang-format`, `.clang-tidy`, CI files, and local docs before editing.
+   - If the request is about MCU firmware, OpenOCD, linker scripts, startup code, `arm-none-eabi`, or Cortex-Debug, switch to `embedded-project-setup`.
 
 2. Generate or update the project.
    - For greenfield scaffolding, run from this skill directory:
@@ -43,6 +44,7 @@ python3 scripts/scaffold_cpp_project.py \
    - Recommend VS Code extensions: CMake Tools, clangd, CodeLLDB for macOS/Linux, and Microsoft C/C++ debugging support for Windows.
    - Disable competing IntelliSense when clangd is responsible for semantic analysis.
    - Make `compile_commands.json` available through CMake configure output and point clangd at the active preset's build directory.
+   - Add launch configurations for the generated executable on macOS/Linux and Windows when creating a cross-platform scaffold.
 
 5. Add quality gates.
    - Add GoogleTest tests with `ctest`.
@@ -59,8 +61,10 @@ bash scripts/bootstrap_vcpkg.sh
 cmake --preset macos-debug
 cmake --build --preset macos-debug
 ctest --test-dir build/macos-debug --output-on-failure
+bash scripts/format.sh --check
 cmake --preset macos-tidy
 cmake --build --preset macos-tidy
+cmake --build --preset macos-debug --target docs
 ```
 
 Adjust preset names for Linux or Windows. If vcpkg, compilers, or Doxygen are unavailable, report exactly what was skipped and why.

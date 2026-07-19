@@ -47,6 +47,7 @@ project/
     Doxyfile.in
   scripts/
     bootstrap_vcpkg.sh
+    bootstrap_vcpkg.ps1
     format.sh
   .vscode/
     extensions.json
@@ -85,7 +86,7 @@ project/
 - Recommend `ms-vscode.cmake-tools`, `llvm-vs-code-extensions.vscode-clangd`, `vadimcn.vscode-lldb`, and `ms-vscode.cpptools`.
 - Disable Microsoft IntelliSense if clangd owns semantic analysis.
 - Use CMake Tools presets instead of hand-written build tasks.
-- Add a launch config only for concrete executables.
+- Add launch configs only for concrete executables; use CodeLLDB for macOS/Linux and `cppvsdbg` for Windows/MSVC.
 - Keep clangd pointed at the active preset's build directory; update this path if the user changes presets.
 
 ## Quality Gates

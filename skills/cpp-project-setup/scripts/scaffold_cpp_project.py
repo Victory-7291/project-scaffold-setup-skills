@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import os
 import re
 import stat
 import textwrap
@@ -405,12 +404,21 @@ def main() -> int:
               "version": "0.2.0",
               "configurations": [
                 {
-                  "name": "Debug @TARGET@_app",
+                  "name": "Debug @TARGET@_app (macOS/Linux)",
                   "type": "lldb",
                   "request": "launch",
                   "program": "${workspaceFolder}/build/@CLANGD_PRESET@/src/@TARGET@_app",
                   "args": [],
                   "cwd": "${workspaceFolder}"
+                },
+                {
+                  "name": "Debug @TARGET@_app (Windows MSVC)",
+                  "type": "cppvsdbg",
+                  "request": "launch",
+                  "program": "${workspaceFolder}/build/windows-debug/src/@TARGET@_app.exe",
+                  "args": [],
+                  "cwd": "${workspaceFolder}",
+                  "console": "integratedTerminal"
                 }
               ]
             }

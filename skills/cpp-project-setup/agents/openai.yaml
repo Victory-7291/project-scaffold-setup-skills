@@ -1,4 +1,4 @@
 interface:
   display_name: "C++ Project Setup"
-  short_description: "Scaffold modern C++ CMake projects"
-  default_prompt: "Use $cpp-project-setup to create a modern C++ project with CMake, vcpkg, tests, formatting, linting, and VS Code setup."
+  short_description: "Scaffold host C++ CMake/vcpkg projects"
+  default_prompt: "Use $cpp-project-setup to create a host-side modern C++ project with CMake, vcpkg, tests, formatting, linting, docs, and VS Code debug setup."
