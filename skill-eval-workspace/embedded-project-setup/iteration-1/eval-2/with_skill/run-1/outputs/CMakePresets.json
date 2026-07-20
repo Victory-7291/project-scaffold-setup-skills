@@ -1,0 +1,49 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 24,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "toolchainFile": "${sourceDir}/cmake/arm-none-eabi-gcc.cmake",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "stm32-debug",
+      "inherits": "base",
+      "displayName": "STM32 Debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "stm32-release",
+      "inherits": "base",
+      "displayName": "STM32 Release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "stm32-analyze",
+      "inherits": "stm32-debug",
+      "displayName": "STM32 clang-tidy",
+      "cacheVariables": {
+        "FIRMWARE_ENABLE_CLANG_TIDY": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "stm32-debug", "configurePreset": "stm32-debug" },
+    { "name": "stm32-release", "configurePreset": "stm32-release" },
+    { "name": "stm32-analyze", "configurePreset": "stm32-analyze" }
+  ]
+}

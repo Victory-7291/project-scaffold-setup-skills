@@ -1,0 +1,30 @@
+{
+  "files_created": [
+    ".clang-format",
+    ".clang-tidy",
+    ".clangd",
+    ".gitignore",
+    ".vscode/extensions.json",
+    ".vscode/launch.json",
+    ".vscode/settings.json",
+    "CMakeLists.txt",
+    "CMakePresets.json",
+    "README.md",
+    "cmake/Warnings.cmake",
+    "docs/Doxyfile.in",
+    "include/cpp_eval_legacy/core.hpp",
+    "scripts/bootstrap_vcpkg.ps1",
+    "scripts/bootstrap_vcpkg.sh",
+    "scripts/format.ps1",
+    "scripts/format.sh",
+    "src/CMakeLists.txt",
+    "src/core.cpp",
+    "src/main.cpp",
+    "tests/CMakeLists.txt",
+    "tests/test_core.cpp",
+    "vcpkg.json"
+  ],
+  "total_tool_calls": 40,
+  "errors_encountered": 1,
+  "output_chars": 15589
+}

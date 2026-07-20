@@ -1,0 +1,141 @@
+{
+  "expectations": [
+    {
+      "text": "CMakeLists.txt targets the arm-none-eabi-gcc toolchain and produces an ELF",
+      "passed": false,
+      "evidence": "CMakeLists.txt missing: ['ELF']"
+    },
+    {
+      "text": "cmake/arm-none-eabi-gcc.cmake sets CMAKE_SYSTEM_NAME Generic and uses arm-none-eabi-gcc",
+      "passed": true,
+      "evidence": "cmake/arm-none-eabi-gcc.cmake contains all required patterns"
+    },
+    {
+      "text": "CMakePresets.json contains stm32-debug, stm32-release, and stm32-analyze presets",
+      "passed": true,
+      "evidence": "CMakePresets.json contains all required patterns"
+    },
+    {
+      "text": "startup/startup.c provides a vector table and Reset_Handler",
+      "passed": true,
+      "evidence": "startup/startup.c contains all required patterns"
+    },
+    {
+      "text": "ldscripts/smart_sensor_flash.ld defines FLASH and RAM regions matching STM32G030C8T6 (64K flash, 8K RAM)",
+      "passed": true,
+      "evidence": "ldscripts/smart_sensor_flash.ld matches all required regexes"
+    },
+    {
+      "text": ".vscode/launch.json has a cortex-debug configuration using OpenOCD",
+      "passed": true,
+      "evidence": ".vscode/launch.json contains all required patterns"
+    },
+    {
+      "text": "scripts/flash.sh and scripts/openocd_server.sh reference stlink and stm32g0x cfg files",
+      "passed": true,
+      "evidence": "scripts/flash.sh contains all required patterns"
+    },
+    {
+      "text": "README.md mentions macOS Apple Silicon host profile and build/flash commands",
+      "passed": true,
+      "evidence": "README.md contains all required patterns"
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 1,
+    "total": 8,
+    "pass_rate": 0.875
+  },
+  "execution_metrics": {
+    "files_created": [
+      "CMakeLists.txt",
+      "CMakePresets.json",
+      "Dockerfile",
+      "README.md",
+      "build/stm32-analyze/.ninja_deps",
+      "build/stm32-analyze/.ninja_log",
+      "build/stm32-analyze/CMakeCache.txt",
+      "build/stm32-analyze/CMakeFiles/4.3.4/CMakeCCompiler.cmake",
+      "build/stm32-analyze/CMakeFiles/4.3.4/CMakeDetermineCompilerABI_C.bin",
+      "build/stm32-analyze/CMakeFiles/4.3.4/CMakeSystem.cmake",
+      "build/stm32-analyze/CMakeFiles/4.3.4/CompilerIdC/CMakeCCompilerId.c",
+      "build/stm32-analyze/CMakeFiles/4.3.4/CompilerIdC/CMakeCCompilerId.o",
+      "build/stm32-analyze/CMakeFiles/CMakeConfigureLog.yaml",
+      "build/stm32-analyze/CMakeFiles/InstallScripts.json",
+      "build/stm32-analyze/CMakeFiles/TargetDirectories.txt",
+      "build/stm32-analyze/CMakeFiles/cmake.check_cache",
+      "build/stm32-analyze/CMakeFiles/rules.ninja",
+      "build/stm32-analyze/CMakeFiles/smart_sensor.dir/src/app/app.c.obj",
+      "build/stm32-analyze/CMakeFiles/smart_sensor.dir/src/bsp/board.c.obj",
+      "build/stm32-analyze/CMakeFiles/smart_sensor.dir/src/main.c.obj",
+      "build/stm32-analyze/CMakeFiles/smart_sensor.dir/startup/startup.c.obj",
+      "build/stm32-analyze/build.ninja",
+      "build/stm32-analyze/cmake_install.cmake",
+      "build/stm32-analyze/compile_commands.json",
+      "build/stm32-analyze/smart_sensor.bin",
+      "build/stm32-analyze/smart_sensor.elf",
+      "build/stm32-analyze/smart_sensor.hex",
+      "build/stm32-analyze/smart_sensor.map",
+      "build/stm32-debug/.ninja_deps",
+      "build/stm32-debug/.ninja_log",
+      "build/stm32-debug/CMakeCache.txt",
+      "build/stm32-debug/CMakeFiles/4.3.4/CMakeCCompiler.cmake",
+      "build/stm32-debug/CMakeFiles/4.3.4/CMakeDetermineCompilerABI_C.bin",
+      "build/stm32-debug/CMakeFiles/4.3.4/CMakeSystem.cmake",
+      "build/stm32-debug/CMakeFiles/4.3.4/CompilerIdC/CMakeCCompilerId.c",
+      "build/stm32-debug/CMakeFiles/4.3.4/CompilerIdC/CMakeCCompilerId.o",
+      "build/stm32-debug/CMakeFiles/CMakeConfigureLog.yaml",
+      "build/stm32-debug/CMakeFiles/InstallScripts.json",
+      "build/stm32-debug/CMakeFiles/TargetDirectories.txt",
+      "build/stm32-debug/CMakeFiles/cmake.check_cache",
+      "build/stm32-debug/CMakeFiles/rules.ninja",
+      "build/stm32-debug/CMakeFiles/smart_sensor.dir/src/app/app.c.obj",
+      "build/stm32-debug/CMakeFiles/smart_sensor.dir/src/bsp/board.c.obj",
+      "build/stm32-debug/CMakeFiles/smart_sensor.dir/src/main.c.obj",
+      "build/stm32-debug/CMakeFiles/smart_sensor.dir/startup/startup.c.obj",
+      "build/stm32-debug/build.ninja",
+      "build/stm32-debug/cmake_install.cmake",
+      "build/stm32-debug/compile_commands.json",
+      "build/stm32-debug/smart_sensor.bin",
+      "build/stm32-debug/smart_sensor.elf",
+      "build/stm32-debug/smart_sensor.hex",
+      "build/stm32-debug/smart_sensor.map",
+      "clang-format",
+      "clang-tidy",
+      "clangd",
+      "cmake/arm-none-eabi-gcc.cmake",
+      "github/workflows/firmware.yml",
+      "gitignore",
+      "include/project_config.h",
+      "ldscripts/smart_sensor_flash.ld",
+      "scripts/analyze.ps1",
+      "scripts/analyze.sh",
+      "scripts/build.ps1",
+      "scripts/build.sh",
+      "scripts/flash.ps1",
+      "scripts/flash.sh",
+      "scripts/format.ps1",
+      "scripts/format.sh",
+      "scripts/openocd_server.ps1",
+      "scripts/openocd_server.sh",
+      "src/app/app.c",
+      "src/app/app.h",
+      "src/bsp/board.c",
+      "src/bsp/board.h",
+      "src/main.c",
+      "startup/startup.c",
+      "vscode/extensions.json",
+      "vscode/launch.json",
+      "vscode/settings.json"
+    ],
+    "total_tool_calls": 10,
+    "errors_encountered": 0,
+    "output_chars": 443335
+  },
+  "timing": {
+    "total_tokens": 23983,
+    "duration_ms": 436434,
+    "total_duration_seconds": 436.4
+  }
+}

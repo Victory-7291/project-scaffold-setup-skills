@@ -1,0 +1,85 @@
+{
+  "expectations": [
+    {
+      "text": "CMakeLists.txt passes -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard",
+      "passed": true,
+      "evidence": "CMakeLists.txt contains all required patterns"
+    },
+    {
+      "text": "CMakePresets.json has stm32-debug, stm32-release, and stm32-analyze presets",
+      "passed": true,
+      "evidence": "CMakePresets.json contains all required patterns"
+    },
+    {
+      "text": "ldscripts/motor_ctrl_flash.ld has 512K flash and 128K RAM lengths",
+      "passed": true,
+      "evidence": "ldscripts/motor_ctrl_flash.ld matches all required regexes"
+    },
+    {
+      "text": ".vscode/launch.json references interface/stlink.cfg and target/stm32f4x.cfg",
+      "passed": true,
+      "evidence": ".vscode/launch.json contains all required patterns"
+    },
+    {
+      "text": "src/ contains app/, bsp/, and drivers/ subdirectories",
+      "passed": true,
+      "evidence": "Found src/drivers/motor.c"
+    },
+    {
+      "text": "README.md notes the STM32F446RE target and suggests CMSIS/HAL integration",
+      "passed": false,
+      "evidence": "README.md missing: ['STM32F446RE']"
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 1,
+    "total": 6,
+    "pass_rate": 0.8333333333333334
+  },
+  "execution_metrics": {
+    "files_created": [
+      ".clang-format",
+      ".clang-tidy",
+      ".clangd",
+      ".github/workflows/firmware.yml",
+      ".gitignore",
+      ".vscode/extensions.json",
+      ".vscode/launch.json",
+      ".vscode/settings.json",
+      "CMakeLists.txt",
+      "CMakePresets.json",
+      "Dockerfile",
+      "README.md",
+      "cmake/arm-none-eabi-gcc.cmake",
+      "include/project_config.h",
+      "ldscripts/motor_ctrl_flash.ld",
+      "scripts/analyze.ps1",
+      "scripts/analyze.sh",
+      "scripts/build.ps1",
+      "scripts/build.sh",
+      "scripts/flash.ps1",
+      "scripts/flash.sh",
+      "scripts/format.ps1",
+      "scripts/format.sh",
+      "scripts/openocd_server.ps1",
+      "scripts/openocd_server.sh",
+      "src/app/app.c",
+      "src/app/app.h",
+      "src/bsp/board.c",
+      "src/bsp/board.h",
+      "src/drivers/motor.c",
+      "src/drivers/motor.h",
+      "src/main.c",
+      "startup/startup.c"
+    ],
+    "total_tool_calls": 16,
+    "errors_encountered": 0,
+    "output_chars": 17134
+  },
+  "timing": {
+    "total_tokens": 26984,
+    "duration_ms": 429034,
+    "total_duration_seconds": 429.0
+  }
+}

@@ -1,0 +1,17 @@
+Checks: >
+  -*,
+  bugprone-*,
+  clang-analyzer-*,
+  performance-*,
+  readability-*,
+  -bugprone-reserved-identifier,
+  -clang-analyzer-core.FixedAddressDereference,
+  -clang-analyzer-security.ArrayBound,
+  -performance-no-int-to-ptr,
+  -readability-magic-numbers,
+  -readability-isolate-declaration,
+  -readability-redundant-casting,
+  -readability-uppercase-literal-suffix
+WarningsAsErrors: ''
+HeaderFilterRegex: '.*'
+FormatStyle: file

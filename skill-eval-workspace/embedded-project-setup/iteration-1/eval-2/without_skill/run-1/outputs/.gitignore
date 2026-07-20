@@ -1,0 +1,13 @@
+# Build output
+build/*
+!build/.gitkeep
+
+# IDE
+.vscode/*.log
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

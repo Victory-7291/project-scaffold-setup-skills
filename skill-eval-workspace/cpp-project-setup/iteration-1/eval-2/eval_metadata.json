@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "eval_name": "greenfield-windows-x64-math-utils",
+  "prompt": "Create a cross-platform C++20 library project named 'math_utils' for Windows x64 in /tmp/cpp_eval_math_utils. It should be a static library with unit tests, clang-tidy analysis preset, and PowerShell format/bootstrap scripts. Also add a VS Code launch config for cppvsdbg.",
+  "assertions": [
+    "CMakeLists.txt targets C++20 and defines a math_utils_lib library",
+    "CMakePresets.json contains windows-x64-debug, windows-x64-release, and windows-x64-tidy presets",
+    ".vscode/launch.json includes a cppvsdbg configuration for Windows",
+    "scripts/bootstrap_vcpkg.ps1 and scripts/format.ps1 are generated",
+    "tests/test_core.cpp uses GoogleTest",
+    "README.md shows PowerShell bootstrap and build commands"
+  ]
+}

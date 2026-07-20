@@ -1,0 +1,7 @@
+{
+  "name": "cpp-eval-legacy",
+  "version-string": "0.1.0",
+  "dependencies": [
+    "gtest"
+  ]
+}

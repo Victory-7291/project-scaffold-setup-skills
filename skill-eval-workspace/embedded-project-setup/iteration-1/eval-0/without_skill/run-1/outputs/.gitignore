@@ -1,0 +1,10 @@
+build/
+.cache/
+*.elf
+*.hex
+*.bin
+*.map
+*.lst
+compile_commands.json
+.vscode/*.db
+.vscode/ipch/

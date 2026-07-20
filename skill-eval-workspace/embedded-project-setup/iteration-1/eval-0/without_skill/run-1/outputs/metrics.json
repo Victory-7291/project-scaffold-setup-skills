@@ -1,0 +1,25 @@
+{
+  "files_created": [
+    ".clang-format",
+    ".clang-tidy",
+    ".gitignore",
+    ".vscode/c_cpp_properties.json",
+    ".vscode/extensions.json",
+    ".vscode/launch.json",
+    ".vscode/settings.json",
+    ".vscode/tasks.json",
+    "CMakeLists.txt",
+    "README.md",
+    "cmake/toolchain-arm-none-eabi.cmake",
+    "include/stm32g030xx.h",
+    "include/system_stm32g0xx.h",
+    "linker/STM32G030C8Tx_FLASH.ld",
+    "openocd.cfg",
+    "src/main.c",
+    "src/startup_stm32g030xx.s",
+    "src/system_stm32g0xx.c"
+  ],
+  "total_tool_calls": 25,
+  "errors_encountered": 0,
+  "output_chars": 11265
+}

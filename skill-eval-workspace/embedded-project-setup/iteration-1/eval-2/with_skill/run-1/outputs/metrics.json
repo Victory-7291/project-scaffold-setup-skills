@@ -1,0 +1,33 @@
+{
+  "files_created": [
+    ".clang-format",
+    ".clang-tidy",
+    ".clangd",
+    ".github/workflows/firmware.yml",
+    ".gitignore",
+    ".vscode/extensions.json",
+    ".vscode/launch.json",
+    ".vscode/settings.json",
+    "CMakeLists.txt",
+    "CMakePresets.json",
+    "Dockerfile",
+    "Inc/stm32f4xx_hal.h",
+    "Src/stm32f4xx_hal.c",
+    "cmake/arm-none-eabi-gcc.cmake",
+    "ldscripts/stm32f446re_flash.ld",
+    "scripts/analyze.ps1",
+    "scripts/analyze.sh",
+    "scripts/build.ps1",
+    "scripts/build.sh",
+    "scripts/flash.ps1",
+    "scripts/flash.sh",
+    "scripts/format.ps1",
+    "scripts/format.sh",
+    "scripts/openocd_server.ps1",
+    "scripts/openocd_server.sh",
+    "startup/startup.c"
+  ],
+  "total_tool_calls": 30,
+  "errors_encountered": 1,
+  "output_chars": 15758
+}

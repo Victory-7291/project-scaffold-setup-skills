@@ -1,0 +1,80 @@
+{
+  "expectations": [
+    {
+      "text": "CMakeLists.txt targets the arm-none-eabi-gcc toolchain and produces an ELF",
+      "passed": true,
+      "evidence": "CMakeLists.txt contains all required patterns"
+    },
+    {
+      "text": "cmake/arm-none-eabi-gcc.cmake sets CMAKE_SYSTEM_NAME Generic and uses arm-none-eabi-gcc",
+      "passed": false,
+      "evidence": "cmake/arm-none-eabi-gcc.cmake not found or empty"
+    },
+    {
+      "text": "CMakePresets.json contains stm32-debug, stm32-release, and stm32-analyze presets",
+      "passed": false,
+      "evidence": "CMakePresets.json not found or empty"
+    },
+    {
+      "text": "startup/startup.c provides a vector table and Reset_Handler",
+      "passed": false,
+      "evidence": "startup/startup.c not found or empty"
+    },
+    {
+      "text": "ldscripts/smart_sensor_flash.ld defines FLASH and RAM regions matching STM32G030C8T6 (64K flash, 8K RAM)",
+      "passed": false,
+      "evidence": "ldscripts/smart_sensor_flash.ld not found or empty"
+    },
+    {
+      "text": ".vscode/launch.json has a cortex-debug configuration using OpenOCD",
+      "passed": true,
+      "evidence": ".vscode/launch.json contains all required patterns"
+    },
+    {
+      "text": "scripts/flash.sh and scripts/openocd_server.sh reference stlink and stm32g0x cfg files",
+      "passed": false,
+      "evidence": "scripts/flash.sh not found or empty"
+    },
+    {
+      "text": "README.md mentions macOS Apple Silicon host profile and build/flash commands",
+      "passed": true,
+      "evidence": "README.md contains all required patterns"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 5,
+    "total": 8,
+    "pass_rate": 0.375
+  },
+  "execution_metrics": {
+    "files_created": [
+      ".clang-format",
+      ".clang-tidy",
+      ".gitignore",
+      ".vscode/c_cpp_properties.json",
+      ".vscode/extensions.json",
+      ".vscode/launch.json",
+      ".vscode/settings.json",
+      ".vscode/tasks.json",
+      "CMakeLists.txt",
+      "README.md",
+      "cmake/toolchain-arm-none-eabi.cmake",
+      "include/stm32g030xx.h",
+      "include/system_stm32g0xx.h",
+      "linker/STM32G030C8Tx_FLASH.ld",
+      "openocd.cfg",
+      "src/main.c",
+      "src/startup_stm32g030xx.s",
+      "src/system_stm32g0xx.c"
+    ],
+    "total_tool_calls": 25,
+    "errors_encountered": 0,
+    "output_chars": 11265
+  },
+  "timing": {
+    "total_tokens": 21366,
+    "duration_ms": 1022368,
+    "total_duration_seconds": 1022.4
+  }
+}

@@ -1,0 +1,26 @@
+# Compiled outputs
+build/
+out/
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake-build-*/
+compile_commands.json
+
+# IDE
+.vscode/settings.json
+.vscode/c_cpp_properties.json
+.idea/
+*.user
+
+# macOS
+.DS_Store
+
+# vcpkg installed tree (when using manifests)
+vcpkg_installed/

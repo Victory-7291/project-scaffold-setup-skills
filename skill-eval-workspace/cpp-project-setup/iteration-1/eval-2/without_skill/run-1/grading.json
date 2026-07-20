@@ -1,0 +1,74 @@
+{
+  "expectations": [
+    {
+      "text": "CMakeLists.txt targets C++20 and defines a math_utils_lib library",
+      "passed": false,
+      "evidence": "CMakeLists.txt missing: ['math_utils_lib']"
+    },
+    {
+      "text": "CMakePresets.json contains windows-x64-debug, windows-x64-release, and windows-x64-tidy presets",
+      "passed": false,
+      "evidence": "CMakePresets.json missing: ['windows-x64-tidy']"
+    },
+    {
+      "text": ".vscode/launch.json includes a cppvsdbg configuration for Windows",
+      "passed": false,
+      "evidence": ".vscode/launch.json not found or empty"
+    },
+    {
+      "text": "scripts/bootstrap_vcpkg.ps1 and scripts/format.ps1 are generated",
+      "passed": true,
+      "evidence": "Found scripts/format.ps1"
+    },
+    {
+      "text": "tests/test_core.cpp uses GoogleTest",
+      "passed": false,
+      "evidence": "tests/test_core.cpp not found or empty"
+    },
+    {
+      "text": "README.md shows PowerShell bootstrap and build commands",
+      "passed": false,
+      "evidence": "README.md not found or empty"
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 5,
+    "total": 6,
+    "pass_rate": 0.16666666666666666
+  },
+  "execution_metrics": {
+    "files_created": [
+      ".clang-format",
+      ".clang-tidy",
+      ".gitignore",
+      ".vscode/c_cpp_properties.json",
+      ".vscode/launch.json",
+      ".vscode/settings.json",
+      ".vscode/tasks.json",
+      "CMakeLists.txt",
+      "CMakePresets.json",
+      "cmake/math_utils-config.cmake.in",
+      "cmake/toolchain-x64-windows.cmake",
+      "cmake/tools.cmake",
+      "include/math_utils/math_utils.hpp",
+      "include/math_utils/math_utils/arithmetic.hpp",
+      "include/math_utils/math_utils/constants.hpp",
+      "scripts/bootstrap.ps1",
+      "scripts/format.ps1",
+      "src/arithmetic.cpp",
+      "src/constants.cpp",
+      "tests/CMakeLists.txt",
+      "tests/test_arithmetic.cpp",
+      "vcpkg.json"
+    ],
+    "total_tool_calls": 28,
+    "errors_encountered": 0,
+    "output_chars": 12931
+  },
+  "timing": {
+    "total_tokens": 20353,
+    "duration_ms": 1610500,
+    "total_duration_seconds": 1610.5
+  }
+}

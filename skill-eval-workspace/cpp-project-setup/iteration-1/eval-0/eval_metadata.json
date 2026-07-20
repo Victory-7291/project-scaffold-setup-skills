@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "eval_name": "greenfield-macos-arm64-image-tool",
+  "prompt": "I'm starting a new C++ command-line tool called 'image_tool' on my MacBook Pro (Apple Silicon). I want a modern setup with CMake, vcpkg, unit tests, formatting, linting, and VS Code debugging. Create the project scaffold in /tmp/cpp_eval_image_tool.",
+  "assertions": [
+    "CMakeLists.txt sets CXX standard to 20 and exports compile commands",
+    "vcpkg.json includes gtest as a dependency",
+    "CMakePresets.json contains macos-arm64-debug and macos-arm64-tidy presets",
+    "A library target image_tool_lib and executable image_tool_app are defined",
+    "tests/test_core.cpp includes GoogleTest assertions",
+    ".vscode/launch.json has a CodeLLDB debug configuration for the app",
+    "README.md references the macOS Apple Silicon host profile and bootstrap command"
+  ]
+}

@@ -1,0 +1,6 @@
+CompileFlags:
+  CompilationDatabase: build/stm32-debug
+  Add:
+    - --target=arm-none-eabi
+Diagnostics:
+  ClangTidy: true

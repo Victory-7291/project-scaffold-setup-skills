@@ -1,0 +1,3 @@
+#pragma once
+
+#define PROJECT_HEARTBEAT_DELAY_CYCLES (120000u)

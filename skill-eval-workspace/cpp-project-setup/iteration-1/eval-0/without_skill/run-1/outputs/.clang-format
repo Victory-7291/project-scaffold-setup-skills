@@ -1,0 +1,12 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 100
+Standard: c++20
+NamespaceIndentation: None
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: Empty
+SortIncludes: CaseSensitive
+IncludeBlocks: Preserve
+PointerAlignment: Left
+ReferenceAlignment: Pointer
+ReflowComments: true

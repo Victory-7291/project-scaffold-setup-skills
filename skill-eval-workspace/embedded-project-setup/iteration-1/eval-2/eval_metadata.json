@@ -1,0 +1,15 @@
+{
+  "eval_id": 3,
+  "eval_name": "modernize-cubemx-keil",
+  "prompt": "Modernize an existing firmware project in /tmp/embedded_eval_cubemx_legacy. It currently has a Keil .uvprojx, CubeMX-generated Src/Inc folders with HAL files, and an ST-Link debug setup. Convert it to CMake + Ninja + arm-none-eabi-gcc, add clang-format/clang-tidy, OpenOCD flash/debug scripts, and VS Code Cortex-Debug. Preserve the existing HAL-based application code.",
+  "assertions": [
+    "Existing Src/ and Inc/ HAL application files are preserved, not deleted",
+    "CMakeLists.txt is added and configured for arm-none-eabi-gcc",
+    "cmake/arm-none-eabi-gcc.cmake is created",
+    "CMakePresets.json with stm32-debug, stm32-release, and stm32-analyze is created",
+    ".clang-format, .clang-tidy, and .clangd are added",
+    ".vscode/launch.json uses cortex-debug with OpenOCD",
+    "scripts/flash.sh and scripts/openocd_server.sh are added",
+    "README.md documents the new build/flash workflow"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "eval_id": 1,
+  "eval_name": "greenfield-stm32g0-smart-sensor",
+  "prompt": "I need a new STM32 firmware project for a smart sensor node. I'm on macOS Apple Silicon. Use the default STM32G030C8T6 target, create the project in /tmp/embedded_eval_smart_sensor, and set up CMake, Ninja, arm-none-eabi-gcc, clang-format, clang-tidy, OpenOCD, and Cortex-Debug in VS Code.",
+  "assertions": [
+    "CMakeLists.txt targets the arm-none-eabi-gcc toolchain and produces an ELF",
+    "cmake/arm-none-eabi-gcc.cmake sets CMAKE_SYSTEM_NAME Generic and uses arm-none-eabi-gcc",
+    "CMakePresets.json contains stm32-debug, stm32-release, and stm32-analyze presets",
+    "startup/startup.c provides a vector table and Reset_Handler",
+    "ldscripts/smart_sensor_flash.ld defines FLASH and RAM regions matching STM32G030C8T6 (64K flash, 8K RAM)",
+    ".vscode/launch.json has a cortex-debug configuration using OpenOCD",
+    "scripts/flash.sh and scripts/openocd_server.sh reference stlink and stm32g0x cfg files",
+    "README.md mentions macOS Apple Silicon host profile and build/flash commands"
+  ]
+}

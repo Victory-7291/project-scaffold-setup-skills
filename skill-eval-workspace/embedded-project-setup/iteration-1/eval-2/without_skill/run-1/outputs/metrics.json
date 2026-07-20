@@ -1,0 +1,31 @@
+{
+  "files_created": [
+    ".clang-format",
+    ".clang-tidy",
+    ".gitignore",
+    ".vscode/c_cpp_properties.json",
+    ".vscode/extensions.json",
+    ".vscode/launch.json",
+    ".vscode/tasks.json",
+    "CMakeLists.txt",
+    "Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h",
+    "Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.c",
+    "Drivers/CMSIS/Include/core_cm4.h",
+    "Drivers/CMSIS/Include/stdint.h",
+    "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h",
+    "Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c",
+    "Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c",
+    "Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c",
+    "Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c",
+    "build/.gitkeep",
+    "cmake/toolchain-arm-none-eabi.cmake",
+    "linker/STM32F446RETx_FLASH.ld",
+    "scripts/debug_openocd.sh",
+    "scripts/debug_vscode.sh",
+    "scripts/flash_openocd.sh",
+    "startup/startup_stm32f446xx.s"
+  ],
+  "total_tool_calls": 90,
+  "errors_encountered": 6,
+  "output_chars": 18210
+}

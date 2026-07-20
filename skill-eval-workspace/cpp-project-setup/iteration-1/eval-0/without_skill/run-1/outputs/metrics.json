@@ -1,0 +1,25 @@
+{
+  "files_created": [
+    ".clang-format",
+    ".clang-tidy",
+    ".gitignore",
+    ".vscode/c_cpp_properties.json",
+    ".vscode/launch.json",
+    ".vscode/settings.json",
+    ".vscode/tasks.json",
+    "CMakeLists.txt",
+    "CMakePresets.json",
+    "README.md",
+    "include/image_tool/image_info.hpp",
+    "src/image_tool/image_info.cpp",
+    "src/main.cpp",
+    "tests/test_image_info.cpp",
+    "tests/test_main.cpp",
+    "tools/make_sample_png.py",
+    "tools/sample.png",
+    "vcpkg.json"
+  ],
+  "total_tool_calls": 20,
+  "errors_encountered": 1,
+  "output_chars": 20637
+}

@@ -1,0 +1,29 @@
+{
+    "files_created": [
+        ".clang-format",
+        ".clang-tidy",
+        ".gitignore",
+        ".vscode/c_cpp_properties.json",
+        ".vscode/launch.json",
+        ".vscode/settings.json",
+        ".vscode/tasks.json",
+        "CMakeLists.txt",
+        "CMakePresets.json",
+        "cmake/math_utils-config.cmake.in",
+        "cmake/toolchain-x64-windows.cmake",
+        "cmake/tools.cmake",
+        "include/math_utils/math_utils.hpp",
+        "include/math_utils/math_utils/arithmetic.hpp",
+        "include/math_utils/math_utils/constants.hpp",
+        "scripts/bootstrap.ps1",
+        "scripts/format.ps1",
+        "src/arithmetic.cpp",
+        "src/constants.cpp",
+        "tests/CMakeLists.txt",
+        "tests/test_arithmetic.cpp",
+        "vcpkg.json"
+    ],
+    "total_tool_calls": 28,
+    "errors_encountered": 0,
+    "output_chars": 12931
+}

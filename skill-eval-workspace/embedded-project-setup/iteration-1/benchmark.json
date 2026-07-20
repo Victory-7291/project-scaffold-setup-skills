@@ -1,0 +1,393 @@
+{
+  "metadata": {
+    "skill_name": "embedded-project-setup",
+    "skill_path": "/Users/wan/Documents/project-scaffold-setup-skills/skills/embedded-project-setup",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-07-20T07:45:30Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.875,
+        "passed": 7,
+        "failed": 1,
+        "total": 8,
+        "time_seconds": 436.4,
+        "tokens": 443335,
+        "tool_calls": 10,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "CMakeLists.txt targets the arm-none-eabi-gcc toolchain and produces an ELF",
+          "passed": false,
+          "evidence": "CMakeLists.txt missing: ['ELF']"
+        },
+        {
+          "text": "cmake/arm-none-eabi-gcc.cmake sets CMAKE_SYSTEM_NAME Generic and uses arm-none-eabi-gcc",
+          "passed": true,
+          "evidence": "cmake/arm-none-eabi-gcc.cmake contains all required patterns"
+        },
+        {
+          "text": "CMakePresets.json contains stm32-debug, stm32-release, and stm32-analyze presets",
+          "passed": true,
+          "evidence": "CMakePresets.json contains all required patterns"
+        },
+        {
+          "text": "startup/startup.c provides a vector table and Reset_Handler",
+          "passed": true,
+          "evidence": "startup/startup.c contains all required patterns"
+        },
+        {
+          "text": "ldscripts/smart_sensor_flash.ld defines FLASH and RAM regions matching STM32G030C8T6 (64K flash, 8K RAM)",
+          "passed": true,
+          "evidence": "ldscripts/smart_sensor_flash.ld matches all required regexes"
+        },
+        {
+          "text": ".vscode/launch.json has a cortex-debug configuration using OpenOCD",
+          "passed": true,
+          "evidence": ".vscode/launch.json contains all required patterns"
+        },
+        {
+          "text": "scripts/flash.sh and scripts/openocd_server.sh reference stlink and stm32g0x cfg files",
+          "passed": true,
+          "evidence": "scripts/flash.sh contains all required patterns"
+        },
+        {
+          "text": "README.md mentions macOS Apple Silicon host profile and build/flash commands",
+          "passed": true,
+          "evidence": "README.md contains all required patterns"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8333333333333334,
+        "passed": 5,
+        "failed": 1,
+        "total": 6,
+        "time_seconds": 429.0,
+        "tokens": 17134,
+        "tool_calls": 16,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "CMakeLists.txt passes -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard",
+          "passed": true,
+          "evidence": "CMakeLists.txt contains all required patterns"
+        },
+        {
+          "text": "CMakePresets.json has stm32-debug, stm32-release, and stm32-analyze presets",
+          "passed": true,
+          "evidence": "CMakePresets.json contains all required patterns"
+        },
+        {
+          "text": "ldscripts/motor_ctrl_flash.ld has 512K flash and 128K RAM lengths",
+          "passed": true,
+          "evidence": "ldscripts/motor_ctrl_flash.ld matches all required regexes"
+        },
+        {
+          "text": ".vscode/launch.json references interface/stlink.cfg and target/stm32f4x.cfg",
+          "passed": true,
+          "evidence": ".vscode/launch.json contains all required patterns"
+        },
+        {
+          "text": "src/ contains app/, bsp/, and drivers/ subdirectories",
+          "passed": true,
+          "evidence": "Found src/drivers/motor.c"
+        },
+        {
+          "text": "README.md notes the STM32F446RE target and suggests CMSIS/HAL integration",
+          "passed": false,
+          "evidence": "README.md missing: ['STM32F446RE']"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 8,
+        "failed": 0,
+        "total": 8,
+        "time_seconds": 2122.8,
+        "tokens": 15758,
+        "tool_calls": 30,
+        "errors": 1
+      },
+      "expectations": [
+        {
+          "text": "Existing Src/ and Inc/ HAL application files are preserved, not deleted",
+          "passed": true,
+          "evidence": "Found Inc/main.h"
+        },
+        {
+          "text": "CMakeLists.txt is added and configured for arm-none-eabi-gcc",
+          "passed": true,
+          "evidence": "CMakeLists.txt contains all required patterns"
+        },
+        {
+          "text": "cmake/arm-none-eabi-gcc.cmake is created",
+          "passed": true,
+          "evidence": "Found cmake/arm-none-eabi-gcc.cmake"
+        },
+        {
+          "text": "CMakePresets.json with stm32-debug, stm32-release, and stm32-analyze is created",
+          "passed": true,
+          "evidence": "CMakePresets.json contains all required patterns"
+        },
+        {
+          "text": ".clang-format, .clang-tidy, and .clangd are added",
+          "passed": true,
+          "evidence": "Found .clangd"
+        },
+        {
+          "text": ".vscode/launch.json uses cortex-debug with OpenOCD",
+          "passed": true,
+          "evidence": ".vscode/launch.json contains all required patterns"
+        },
+        {
+          "text": "scripts/flash.sh and scripts/openocd_server.sh are added",
+          "passed": true,
+          "evidence": "Found scripts/openocd_server.sh"
+        },
+        {
+          "text": "README.md documents the new build/flash workflow",
+          "passed": true,
+          "evidence": "README.md contains all required patterns"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.375,
+        "passed": 3,
+        "failed": 5,
+        "total": 8,
+        "time_seconds": 1022.4,
+        "tokens": 11265,
+        "tool_calls": 25,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "CMakeLists.txt targets the arm-none-eabi-gcc toolchain and produces an ELF",
+          "passed": true,
+          "evidence": "CMakeLists.txt contains all required patterns"
+        },
+        {
+          "text": "cmake/arm-none-eabi-gcc.cmake sets CMAKE_SYSTEM_NAME Generic and uses arm-none-eabi-gcc",
+          "passed": false,
+          "evidence": "cmake/arm-none-eabi-gcc.cmake not found or empty"
+        },
+        {
+          "text": "CMakePresets.json contains stm32-debug, stm32-release, and stm32-analyze presets",
+          "passed": false,
+          "evidence": "CMakePresets.json not found or empty"
+        },
+        {
+          "text": "startup/startup.c provides a vector table and Reset_Handler",
+          "passed": false,
+          "evidence": "startup/startup.c not found or empty"
+        },
+        {
+          "text": "ldscripts/smart_sensor_flash.ld defines FLASH and RAM regions matching STM32G030C8T6 (64K flash, 8K RAM)",
+          "passed": false,
+          "evidence": "ldscripts/smart_sensor_flash.ld not found or empty"
+        },
+        {
+          "text": ".vscode/launch.json has a cortex-debug configuration using OpenOCD",
+          "passed": true,
+          "evidence": ".vscode/launch.json contains all required patterns"
+        },
+        {
+          "text": "scripts/flash.sh and scripts/openocd_server.sh reference stlink and stm32g0x cfg files",
+          "passed": false,
+          "evidence": "scripts/flash.sh not found or empty"
+        },
+        {
+          "text": "README.md mentions macOS Apple Silicon host profile and build/flash commands",
+          "passed": true,
+          "evidence": "README.md contains all required patterns"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.16666666666666666,
+        "passed": 1,
+        "failed": 5,
+        "total": 6,
+        "time_seconds": 1283.8,
+        "tokens": 13633,
+        "tool_calls": 28,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "CMakeLists.txt passes -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard",
+          "passed": false,
+          "evidence": "CMakeLists.txt not found or empty"
+        },
+        {
+          "text": "CMakePresets.json has stm32-debug, stm32-release, and stm32-analyze presets",
+          "passed": false,
+          "evidence": "CMakePresets.json not found or empty"
+        },
+        {
+          "text": "ldscripts/motor_ctrl_flash.ld has 512K flash and 128K RAM lengths",
+          "passed": false,
+          "evidence": "ldscripts/motor_ctrl_flash.ld not found or empty"
+        },
+        {
+          "text": ".vscode/launch.json references interface/stlink.cfg and target/stm32f4x.cfg",
+          "passed": false,
+          "evidence": ".vscode/launch.json not found or empty"
+        },
+        {
+          "text": "src/ contains app/, bsp/, and drivers/ subdirectories",
+          "passed": false,
+          "evidence": "Missing src/drivers/motor.c"
+        },
+        {
+          "text": "README.md notes the STM32F446RE target and suggests CMSIS/HAL integration",
+          "passed": true,
+          "evidence": "README.md contains all required patterns"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.5,
+        "passed": 4,
+        "failed": 4,
+        "total": 8,
+        "time_seconds": 3515.8,
+        "tokens": 18210,
+        "tool_calls": 90,
+        "errors": 6
+      },
+      "expectations": [
+        {
+          "text": "Existing Src/ and Inc/ HAL application files are preserved, not deleted",
+          "passed": true,
+          "evidence": "Found Inc/main.h"
+        },
+        {
+          "text": "CMakeLists.txt is added and configured for arm-none-eabi-gcc",
+          "passed": true,
+          "evidence": "CMakeLists.txt contains all required patterns"
+        },
+        {
+          "text": "cmake/arm-none-eabi-gcc.cmake is created",
+          "passed": false,
+          "evidence": "Missing cmake/arm-none-eabi-gcc.cmake"
+        },
+        {
+          "text": "CMakePresets.json with stm32-debug, stm32-release, and stm32-analyze is created",
+          "passed": false,
+          "evidence": "CMakePresets.json not found or empty"
+        },
+        {
+          "text": ".clang-format, .clang-tidy, and .clangd are added",
+          "passed": false,
+          "evidence": "Missing .clangd"
+        },
+        {
+          "text": ".vscode/launch.json uses cortex-debug with OpenOCD",
+          "passed": true,
+          "evidence": ".vscode/launch.json contains all required patterns"
+        },
+        {
+          "text": "scripts/flash.sh and scripts/openocd_server.sh are added",
+          "passed": false,
+          "evidence": "Missing scripts/openocd_server.sh"
+        },
+        {
+          "text": "README.md documents the new build/flash workflow",
+          "passed": true,
+          "evidence": "README.md contains all required patterns"
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.9028,
+        "stddev": 0.0867,
+        "min": 0.8333,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 996.0667,
+        "stddev": 975.7867,
+        "min": 429.0,
+        "max": 2122.8
+      },
+      "tokens": {
+        "mean": 158742.3333,
+        "stddev": 246465.4393,
+        "min": 15758,
+        "max": 443335
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.3472,
+        "stddev": 0.1684,
+        "min": 0.1667,
+        "max": 0.5
+      },
+      "time_seconds": {
+        "mean": 1940.6667,
+        "stddev": 1370.3526,
+        "min": 1022.4,
+        "max": 3515.8
+      },
+      "tokens": {
+        "mean": 14369.3333,
+        "stddev": 3530.566,
+        "min": 11265,
+        "max": 18210
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.56",
+      "time_seconds": "-944.6",
+      "tokens": "+144373"
+    }
+  },
+  "notes": []
+}

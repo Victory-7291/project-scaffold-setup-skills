@@ -1,0 +1,363 @@
+{
+  "metadata": {
+    "skill_name": "cpp-project-setup",
+    "skill_path": "/Users/wan/Documents/project-scaffold-setup-skills/skills/cpp-project-setup",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-07-20T07:41:48Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 255.5,
+        "tokens": 14517,
+        "tool_calls": 7,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "CMakeLists.txt sets CXX standard to 20 and exports compile commands",
+          "passed": true,
+          "evidence": "CMakeLists.txt contains all required patterns"
+        },
+        {
+          "text": "vcpkg.json includes gtest as a dependency",
+          "passed": true,
+          "evidence": "vcpkg.json contains all required patterns"
+        },
+        {
+          "text": "CMakePresets.json contains macos-arm64-debug and macos-arm64-tidy presets",
+          "passed": true,
+          "evidence": "CMakePresets.json contains all required patterns"
+        },
+        {
+          "text": "A library target image_tool_lib and executable image_tool_app are defined",
+          "passed": true,
+          "evidence": "src/CMakeLists.txt contains all required patterns"
+        },
+        {
+          "text": "tests/test_core.cpp includes GoogleTest assertions",
+          "passed": true,
+          "evidence": "tests/test_core.cpp contains all required patterns"
+        },
+        {
+          "text": ".vscode/launch.json has a CodeLLDB debug configuration for the app",
+          "passed": true,
+          "evidence": ".vscode/launch.json contains all required patterns"
+        },
+        {
+          "text": "README.md references the macOS Apple Silicon host profile and bootstrap command",
+          "passed": true,
+          "evidence": "README.md contains all required patterns"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8333333333333334,
+        "passed": 5,
+        "failed": 1,
+        "total": 6,
+        "time_seconds": 1600.4,
+        "tokens": 15589,
+        "tool_calls": 40,
+        "errors": 1
+      },
+      "expectations": [
+        {
+          "text": "The original src/main.cpp hello-world logic is preserved or moved without losing behavior",
+          "passed": true,
+          "evidence": "legacy behavior checked"
+        },
+        {
+          "text": "CMakeLists.txt is created and references a library target",
+          "passed": false,
+          "evidence": "CMakeLists.txt missing: ['add_library', 'add_executable']"
+        },
+        {
+          "text": "vcpkg.json and CMakePresets.json are created",
+          "passed": true,
+          "evidence": "Found CMakePresets.json"
+        },
+        {
+          "text": "tests/ directory with at least one GoogleTest file is added",
+          "passed": true,
+          "evidence": "Found tests/test_core.cpp"
+        },
+        {
+          "text": ".clang-format, .clang-tidy, and .vscode settings are added",
+          "passed": true,
+          "evidence": "Found .vscode/settings.json"
+        },
+        {
+          "text": "README.md explains how to build and test the modernized project",
+          "passed": true,
+          "evidence": "README.md contains all required patterns"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8333333333333334,
+        "passed": 5,
+        "failed": 1,
+        "total": 6,
+        "time_seconds": 271.5,
+        "tokens": 14651,
+        "tool_calls": 7,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "CMakeLists.txt targets C++20 and defines a math_utils_lib library",
+          "passed": false,
+          "evidence": "CMakeLists.txt missing: ['math_utils_lib']"
+        },
+        {
+          "text": "CMakePresets.json contains windows-x64-debug, windows-x64-release, and windows-x64-tidy presets",
+          "passed": true,
+          "evidence": "CMakePresets.json contains all required patterns"
+        },
+        {
+          "text": ".vscode/launch.json includes a cppvsdbg configuration for Windows",
+          "passed": true,
+          "evidence": ".vscode/launch.json contains all required patterns"
+        },
+        {
+          "text": "scripts/bootstrap_vcpkg.ps1 and scripts/format.ps1 are generated",
+          "passed": true,
+          "evidence": "Found scripts/format.ps1"
+        },
+        {
+          "text": "tests/test_core.cpp uses GoogleTest",
+          "passed": true,
+          "evidence": "tests/test_core.cpp contains all required patterns"
+        },
+        {
+          "text": "README.md shows PowerShell bootstrap and build commands",
+          "passed": true,
+          "evidence": "README.md contains all required patterns"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.2857142857142857,
+        "passed": 2,
+        "failed": 5,
+        "total": 7,
+        "time_seconds": 1357.0,
+        "tokens": 20637,
+        "tool_calls": 20,
+        "errors": 1
+      },
+      "expectations": [
+        {
+          "text": "CMakeLists.txt sets CXX standard to 20 and exports compile commands",
+          "passed": true,
+          "evidence": "CMakeLists.txt contains all required patterns"
+        },
+        {
+          "text": "vcpkg.json includes gtest as a dependency",
+          "passed": false,
+          "evidence": "vcpkg.json missing: ['gtest']"
+        },
+        {
+          "text": "CMakePresets.json contains macos-arm64-debug and macos-arm64-tidy presets",
+          "passed": false,
+          "evidence": "CMakePresets.json missing: ['macos-arm64-tidy']"
+        },
+        {
+          "text": "A library target image_tool_lib and executable image_tool_app are defined",
+          "passed": false,
+          "evidence": "src/CMakeLists.txt not found or empty"
+        },
+        {
+          "text": "tests/test_core.cpp includes GoogleTest assertions",
+          "passed": false,
+          "evidence": "tests/test_core.cpp not found or empty"
+        },
+        {
+          "text": ".vscode/launch.json has a CodeLLDB debug configuration for the app",
+          "passed": false,
+          "evidence": ".vscode/launch.json missing: ['image_tool_app']"
+        },
+        {
+          "text": "README.md references the macOS Apple Silicon host profile and bootstrap command",
+          "passed": true,
+          "evidence": "README.md contains all required patterns"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8333333333333334,
+        "passed": 5,
+        "failed": 1,
+        "total": 6,
+        "time_seconds": 1257.2,
+        "tokens": 7541,
+        "tool_calls": 35,
+        "errors": 1
+      },
+      "expectations": [
+        {
+          "text": "The original src/main.cpp hello-world logic is preserved or moved without losing behavior",
+          "passed": true,
+          "evidence": "legacy behavior checked"
+        },
+        {
+          "text": "CMakeLists.txt is created and references a library target",
+          "passed": true,
+          "evidence": "CMakeLists.txt contains all required patterns"
+        },
+        {
+          "text": "vcpkg.json and CMakePresets.json are created",
+          "passed": true,
+          "evidence": "Found CMakePresets.json"
+        },
+        {
+          "text": "tests/ directory with at least one GoogleTest file is added",
+          "passed": false,
+          "evidence": "Missing tests/test_core.cpp"
+        },
+        {
+          "text": ".clang-format, .clang-tidy, and .vscode settings are added",
+          "passed": true,
+          "evidence": "Found .vscode/settings.json"
+        },
+        {
+          "text": "README.md explains how to build and test the modernized project",
+          "passed": true,
+          "evidence": "README.md contains all required patterns"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.16666666666666666,
+        "passed": 1,
+        "failed": 5,
+        "total": 6,
+        "time_seconds": 1610.5,
+        "tokens": 12931,
+        "tool_calls": 28,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "CMakeLists.txt targets C++20 and defines a math_utils_lib library",
+          "passed": false,
+          "evidence": "CMakeLists.txt missing: ['math_utils_lib']"
+        },
+        {
+          "text": "CMakePresets.json contains windows-x64-debug, windows-x64-release, and windows-x64-tidy presets",
+          "passed": false,
+          "evidence": "CMakePresets.json missing: ['windows-x64-tidy']"
+        },
+        {
+          "text": ".vscode/launch.json includes a cppvsdbg configuration for Windows",
+          "passed": false,
+          "evidence": ".vscode/launch.json not found or empty"
+        },
+        {
+          "text": "scripts/bootstrap_vcpkg.ps1 and scripts/format.ps1 are generated",
+          "passed": true,
+          "evidence": "Found scripts/format.ps1"
+        },
+        {
+          "text": "tests/test_core.cpp uses GoogleTest",
+          "passed": false,
+          "evidence": "tests/test_core.cpp not found or empty"
+        },
+        {
+          "text": "README.md shows PowerShell bootstrap and build commands",
+          "passed": false,
+          "evidence": "README.md not found or empty"
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.8889,
+        "stddev": 0.0962,
+        "min": 0.8333,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 709.1333,
+        "stddev": 771.901,
+        "min": 255.5,
+        "max": 1600.4
+      },
+      "tokens": {
+        "mean": 14919.0,
+        "stddev": 584.0925,
+        "min": 14517,
+        "max": 15589
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.4286,
+        "stddev": 0.3556,
+        "min": 0.1667,
+        "max": 0.8333
+      },
+      "time_seconds": {
+        "mean": 1408.2333,
+        "stddev": 182.1369,
+        "min": 1257.2,
+        "max": 1610.5
+      },
+      "tokens": {
+        "mean": 13703.0,
+        "stddev": 6582.0431,
+        "min": 7541,
+        "max": 20637
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.46",
+      "time_seconds": "-699.1",
+      "tokens": "+1216"
+    }
+  },
+  "notes": []
+}

@@ -1,0 +1,82 @@
+{
+    "version": 8,
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "CMAKE_CXX_STANDARD": "20"
+            }
+        },
+        {
+            "name": "macos-arm64-debug",
+            "displayName": "macOS arm64 Debug",
+            "description": "Debug build for Apple Silicon Macs using vcpkg",
+            "inherits": "base",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            },
+            "architecture": {
+                "value": "arm64",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            },
+            "vendor": {
+                "microsoft.com/VisualStudioSettings/CMake/1.0": {
+                    "hostOS": ["macOS"]
+                }
+            }
+        },
+        {
+            "name": "macos-arm64-release",
+            "displayName": "macOS arm64 Release",
+            "description": "Release build for Apple Silicon Macs using vcpkg",
+            "inherits": "base",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            },
+            "architecture": {
+                "value": "arm64",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "macos-arm64-debug",
+            "configurePreset": "macos-arm64-debug"
+        },
+        {
+            "name": "macos-arm64-release",
+            "configurePreset": "macos-arm64-release"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "macos-arm64-debug",
+            "configurePreset": "macos-arm64-debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "macos-arm64-release",
+            "configurePreset": "macos-arm64-release",
+            "output": {
+                "outputOnFailure": true
+            }
+        }
+    ]
+}

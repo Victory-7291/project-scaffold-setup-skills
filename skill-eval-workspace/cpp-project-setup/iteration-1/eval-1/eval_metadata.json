@@ -1,0 +1,13 @@
+{
+  "eval_id": 2,
+  "eval_name": "modernize-legacy-makefile",
+  "prompt": "I have an existing C++ project in /tmp/cpp_eval_legacy that only has a Makefile and a single src/main.cpp with a hello-world program. Modernize it using the C++ project setup skill: switch to CMake + vcpkg, add a reusable library, GoogleTest tests, clang-format, clang-tidy, and VS Code settings. Preserve the existing hello-world behavior.",
+  "assertions": [
+    "The original src/main.cpp hello-world logic is preserved or moved without losing behavior",
+    "CMakeLists.txt is created and references a library target",
+    "vcpkg.json and CMakePresets.json are created",
+    "tests/ directory with at least one GoogleTest file is added",
+    ".clang-format, .clang-tidy, and .vscode settings are added",
+    "README.md explains how to build and test the modernized project"
+  ]
+}

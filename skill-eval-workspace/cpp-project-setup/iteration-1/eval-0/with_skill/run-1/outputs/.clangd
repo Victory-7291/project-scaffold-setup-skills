@@ -1,0 +1,4 @@
+CompileFlags:
+  CompilationDatabase: build/macos-arm64-debug
+Diagnostics:
+  ClangTidy: true

@@ -1,0 +1,75 @@
+{
+  "expectations": [
+    {
+      "text": "CMakeLists.txt sets CXX standard to 20 and exports compile commands",
+      "passed": true,
+      "evidence": "CMakeLists.txt contains all required patterns"
+    },
+    {
+      "text": "vcpkg.json includes gtest as a dependency",
+      "passed": false,
+      "evidence": "vcpkg.json missing: ['gtest']"
+    },
+    {
+      "text": "CMakePresets.json contains macos-arm64-debug and macos-arm64-tidy presets",
+      "passed": false,
+      "evidence": "CMakePresets.json missing: ['macos-arm64-tidy']"
+    },
+    {
+      "text": "A library target image_tool_lib and executable image_tool_app are defined",
+      "passed": false,
+      "evidence": "src/CMakeLists.txt not found or empty"
+    },
+    {
+      "text": "tests/test_core.cpp includes GoogleTest assertions",
+      "passed": false,
+      "evidence": "tests/test_core.cpp not found or empty"
+    },
+    {
+      "text": ".vscode/launch.json has a CodeLLDB debug configuration for the app",
+      "passed": false,
+      "evidence": ".vscode/launch.json missing: ['image_tool_app']"
+    },
+    {
+      "text": "README.md references the macOS Apple Silicon host profile and bootstrap command",
+      "passed": true,
+      "evidence": "README.md contains all required patterns"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 5,
+    "total": 7,
+    "pass_rate": 0.2857142857142857
+  },
+  "execution_metrics": {
+    "files_created": [
+      ".clang-format",
+      ".clang-tidy",
+      ".gitignore",
+      ".vscode/c_cpp_properties.json",
+      ".vscode/launch.json",
+      ".vscode/settings.json",
+      ".vscode/tasks.json",
+      "CMakeLists.txt",
+      "CMakePresets.json",
+      "README.md",
+      "include/image_tool/image_info.hpp",
+      "src/image_tool/image_info.cpp",
+      "src/main.cpp",
+      "tests/test_image_info.cpp",
+      "tests/test_main.cpp",
+      "tools/make_sample_png.py",
+      "tools/sample.png",
+      "vcpkg.json"
+    ],
+    "total_tool_calls": 20,
+    "errors_encountered": 1,
+    "output_chars": 20637
+  },
+  "timing": {
+    "total_tokens": 19106,
+    "duration_ms": 1356989,
+    "total_duration_seconds": 1357.0
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "legacy-greeter",
+  "version": "1.0.0",
+  "description": "Modernized legacy C++ greeting project",
+  "dependencies": [
+    {
+      "name": "gtest",
+      "version>=": "1.14.0"
+    }
+  ]
+}

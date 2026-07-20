@@ -1,0 +1,75 @@
+{
+  "expectations": [
+    {
+      "text": "CMakeLists.txt targets C++20 and defines a math_utils_lib library",
+      "passed": false,
+      "evidence": "CMakeLists.txt missing: ['math_utils_lib']"
+    },
+    {
+      "text": "CMakePresets.json contains windows-x64-debug, windows-x64-release, and windows-x64-tidy presets",
+      "passed": true,
+      "evidence": "CMakePresets.json contains all required patterns"
+    },
+    {
+      "text": ".vscode/launch.json includes a cppvsdbg configuration for Windows",
+      "passed": true,
+      "evidence": ".vscode/launch.json contains all required patterns"
+    },
+    {
+      "text": "scripts/bootstrap_vcpkg.ps1 and scripts/format.ps1 are generated",
+      "passed": true,
+      "evidence": "Found scripts/format.ps1"
+    },
+    {
+      "text": "tests/test_core.cpp uses GoogleTest",
+      "passed": true,
+      "evidence": "tests/test_core.cpp contains all required patterns"
+    },
+    {
+      "text": "README.md shows PowerShell bootstrap and build commands",
+      "passed": true,
+      "evidence": "README.md contains all required patterns"
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 1,
+    "total": 6,
+    "pass_rate": 0.8333333333333334
+  },
+  "execution_metrics": {
+    "files_created": [
+      ".clang-format",
+      ".clang-tidy",
+      ".clangd",
+      ".gitignore",
+      ".vscode/extensions.json",
+      ".vscode/launch.json",
+      ".vscode/settings.json",
+      "CMakeLists.txt",
+      "CMakePresets.json",
+      "README.md",
+      "cmake/Warnings.cmake",
+      "docs/Doxyfile.in",
+      "include/math_utils/core.hpp",
+      "scripts/bootstrap_vcpkg.ps1",
+      "scripts/bootstrap_vcpkg.sh",
+      "scripts/format.ps1",
+      "scripts/format.sh",
+      "src/CMakeLists.txt",
+      "src/core.cpp",
+      "src/main.cpp",
+      "tests/CMakeLists.txt",
+      "tests/test_core.cpp",
+      "vcpkg.json"
+    ],
+    "total_tool_calls": 7,
+    "errors_encountered": 0,
+    "output_chars": 14651
+  },
+  "timing": {
+    "total_tokens": 20169,
+    "duration_ms": 271493,
+    "total_duration_seconds": 271.5
+  }
+}

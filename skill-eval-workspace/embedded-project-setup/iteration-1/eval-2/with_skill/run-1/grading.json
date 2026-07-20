@@ -1,0 +1,88 @@
+{
+  "expectations": [
+    {
+      "text": "Existing Src/ and Inc/ HAL application files are preserved, not deleted",
+      "passed": true,
+      "evidence": "Found Inc/main.h"
+    },
+    {
+      "text": "CMakeLists.txt is added and configured for arm-none-eabi-gcc",
+      "passed": true,
+      "evidence": "CMakeLists.txt contains all required patterns"
+    },
+    {
+      "text": "cmake/arm-none-eabi-gcc.cmake is created",
+      "passed": true,
+      "evidence": "Found cmake/arm-none-eabi-gcc.cmake"
+    },
+    {
+      "text": "CMakePresets.json with stm32-debug, stm32-release, and stm32-analyze is created",
+      "passed": true,
+      "evidence": "CMakePresets.json contains all required patterns"
+    },
+    {
+      "text": ".clang-format, .clang-tidy, and .clangd are added",
+      "passed": true,
+      "evidence": "Found .clangd"
+    },
+    {
+      "text": ".vscode/launch.json uses cortex-debug with OpenOCD",
+      "passed": true,
+      "evidence": ".vscode/launch.json contains all required patterns"
+    },
+    {
+      "text": "scripts/flash.sh and scripts/openocd_server.sh are added",
+      "passed": true,
+      "evidence": "Found scripts/openocd_server.sh"
+    },
+    {
+      "text": "README.md documents the new build/flash workflow",
+      "passed": true,
+      "evidence": "README.md contains all required patterns"
+    }
+  ],
+  "summary": {
+    "passed": 8,
+    "failed": 0,
+    "total": 8,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "files_created": [
+      ".clang-format",
+      ".clang-tidy",
+      ".clangd",
+      ".github/workflows/firmware.yml",
+      ".gitignore",
+      ".vscode/extensions.json",
+      ".vscode/launch.json",
+      ".vscode/settings.json",
+      "CMakeLists.txt",
+      "CMakePresets.json",
+      "Dockerfile",
+      "Inc/stm32f4xx_hal.h",
+      "Src/stm32f4xx_hal.c",
+      "cmake/arm-none-eabi-gcc.cmake",
+      "ldscripts/stm32f446re_flash.ld",
+      "scripts/analyze.ps1",
+      "scripts/analyze.sh",
+      "scripts/build.ps1",
+      "scripts/build.sh",
+      "scripts/flash.ps1",
+      "scripts/flash.sh",
+      "scripts/format.ps1",
+      "scripts/format.sh",
+      "scripts/openocd_server.ps1",
+      "scripts/openocd_server.sh",
+      "startup/startup.c"
+    ],
+    "total_tool_calls": 30,
+    "errors_encountered": 1,
+    "output_chars": 15758
+  },
+  "timing": {
+    "total_tokens": 44775,
+    "duration_ms": 2122785,
+    "total_duration_seconds": 2122.8
+  }
+}

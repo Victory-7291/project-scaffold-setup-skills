@@ -1,0 +1,11 @@
+{
+  "name": "image-tool",
+  "version": "0.1.0",
+  "description": "Command-line image metadata and conversion utility",
+  "dependencies": [
+    "cli11",
+    "fmt",
+    "catch2"
+  ],
+  "builtin-baseline": "c1feb3e2b2d6dd532efde1ad4a45c783735ac876"
+}

@@ -1,0 +1,50 @@
+name: firmware
+
+on:
+  push:
+    paths:
+      - "CMakeLists.txt"
+      - "CMakePresets.json"
+      - "cmake/**"
+      - "include/**"
+      - "src/**"
+      - "startup/**"
+      - "ldscripts/**"
+      - "scripts/**"
+      - "Dockerfile"
+      - ".github/workflows/firmware.yml"
+  pull_request:
+    paths:
+      - "CMakeLists.txt"
+      - "CMakePresets.json"
+      - "cmake/**"
+      - "include/**"
+      - "src/**"
+      - "startup/**"
+      - "ldscripts/**"
+      - "scripts/**"
+      - "Dockerfile"
+      - ".github/workflows/firmware.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build toolchain image
+        run: docker build -t smart_sensor-toolchain .
+      - name: Check formatting
+        run: docker run --rm -v "${{ github.workspace }}:/work" -w /work smart_sensor-toolchain bash scripts/format.sh --check
+      - name: Analyze firmware
+        run: docker run --rm -v "${{ github.workspace }}:/work" -w /work smart_sensor-toolchain bash scripts/analyze.sh
+      - name: Build firmware
+        run: docker run --rm -v "${{ github.workspace }}:/work" -w /work smart_sensor-toolchain bash scripts/build.sh
+      - name: Upload firmware artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: smart_sensor-firmware
+          path: |
+            build/stm32-debug/smart_sensor.elf
+            build/stm32-debug/smart_sensor.bin
+            build/stm32-debug/smart_sensor.hex
+            build/stm32-debug/smart_sensor.map
