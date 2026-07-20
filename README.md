@@ -1,146 +1,92 @@
 # Project Scaffold Setup Skills
 
-这个仓库用于维护一组面向 agent 的项目脚手架 skills，目标是让 Codex/Claude/其他支持 skills 的 agent 能够从零快速搭建结构清晰、工具链明确、可验证的工程项目。
+Reusable skills for coding agents that need to create or modernize engineering projects with a clear structure, explicit toolchains, editor integration, and repeatable validation steps.
 
-仓库里的每个 skill 都聚焦一个项目类型，包含：
+This README is a catalog of the available skills. Each skill is designed to help an agent decide whether it is working in a new or existing project, choose the right platform profile, apply a conservative scaffold or modernization path, and report what was validated locally.
 
-- 面向 agent 的 `SKILL.md` 操作说明
-- 可重复运行的脚手架生成脚本
-- 项目结构、工具链和质量门禁参考文档
-- 可选的 agent/界面元数据
+## Available Skills
 
-## 已有 Skills
-
-| Skill | 用途 | 入口 |
+| Skill | Use It For | What It Sets Up |
 | --- | --- | --- |
-| `cpp-project-setup` | 创建或现代化 C++/CMake/vcpkg 项目，包含 VS Code、CMake Presets、GoogleTest、clangd、clang-format、clang-tidy、Doxygen 等基础设施。 | `skills/cpp-project-setup/SKILL.md` |
-| `embedded-project-setup` | 创建或现代化 STM32/Cortex-M 嵌入式 C 项目，包含 CMake、Ninja、arm-none-eabi、OpenOCD、Cortex-Debug、固件产物和基础 CI 结构。 | `skills/embedded-project-setup/SKILL.md` |
+| `cpp-project-setup` | Host-side C++ applications and libraries on macOS, Linux, or Windows. Use it for new C++ projects, existing CMake modernization, VS Code setup, vcpkg/CMake presets, testing, formatting, linting, documentation, and reproducible developer workflows. | CMake, CMake Presets, vcpkg manifest mode, Ninja, Clang/GCC/MSVC profiles, GoogleTest, clangd, clang-format, clang-tidy, Doxygen, VS Code debug settings, and CI-ready structure. |
+| `embedded-project-setup` | STM32/Cortex-M embedded C firmware projects. Use it for new firmware scaffolds, existing firmware modernization, cross CMake toolchains, linker/startup files, OpenOCD flashing, Cortex-Debug setup, and embedded CI. | CMake, Ninja, `arm-none-eabi-gcc/gdb`, STM32 firmware outputs, linker scripts, startup code, OpenOCD, ST-Link/J-Link workflows, Cortex-Debug, clangd, clang-format, clang-tidy, Docker/GitHub Actions-ready structure, and layered CMSIS/HAL/LL or bare-metal organization. |
+| `python-fastapi-setup` | Python FastAPI services and APIs. Use it for new FastAPI scaffolds, existing single-file or wrapper-launched app modernization, typed settings, lifespan-managed resources, middleware, routers, tests, and deployment commands. | `app/main.py`, versioned API routers, pydantic-settings, lifespan plus `app.state` dependency accessors, request ID/CORS middleware, `/health`, pytest/TestClient, Uvicorn/FastAPI CLI, optional Docker/Compose, and optional Gunicorn via `uvicorn-worker`. |
 
-## 安装
+## What The Skills Do
 
-列出仓库中可安装的 skills：
+These skills are meant for agents, not just humans reading setup notes. They guide an agent to:
+
+- Inspect the current working directory before writing files.
+- Distinguish greenfield scaffolding from existing-project modernization.
+- Detect or ask for the target host platform when toolchain choices depend on OS and CPU architecture.
+- Prefer repeatable, project-local configuration over hidden global assumptions.
+- Generate conservative starter projects only when appropriate.
+- Preserve existing user work when modernizing a repository.
+- Run the strongest available validation commands and clearly report skipped checks when local tools or hardware are missing.
+
+## Installation
+
+List installable skills from this repository:
 
 ```bash
 npx skills add Victory-7291/project-scaffold-setup-skills --list
 ```
 
-安装 C++ 项目脚手架 skill：
+Install every skill:
+
+```bash
+npx skills add Victory-7291/project-scaffold-setup-skills
+```
+
+Install only the C++ project setup skill:
 
 ```bash
 npx skills add Victory-7291/project-scaffold-setup-skills \
   --skill cpp-project-setup
 ```
 
-安装嵌入式项目脚手架 skill：
+Install only the embedded firmware setup skill:
 
 ```bash
 npx skills add Victory-7291/project-scaffold-setup-skills \
   --skill embedded-project-setup
 ```
 
-也可以一次安装仓库里的全部正式 skills：
+Install only the Python FastAPI setup skill:
 
 ```bash
-npx skills add Victory-7291/project-scaffold-setup-skills
+npx skills add Victory-7291/project-scaffold-setup-skills \
+  --skill python-fastapi-setup
 ```
 
-## 仓库结构
+## Example Prompts
+
+Use `cpp-project-setup` when asking an agent for host-side C++ work:
 
 ```text
-.
-├── README.md
-├── AGENTS.md
-├── LICENSE
-└── skills/
-    ├── cpp-project-setup/
-    │   ├── SKILL.md
-    │   ├── agents/
-    │   │   └── openai.yaml
-    │   ├── references/
-    │   │   └── cpp-project-blueprint.md
-    │   └── scripts/
-    │       └── scaffold_cpp_project.py
-    └── embedded-project-setup/
-        ├── SKILL.md
-        ├── agents/
-        │   └── openai.yaml
-        ├── references/
-        │   └── embedded-project-blueprint.md
-        └── scripts/
-            └── scaffold_embedded_project.py
+Use $cpp-project-setup to create a new C++20 command line app named telemetry_tool with CMake, vcpkg, GoogleTest, clang-format, clang-tidy, Doxygen, and VS Code debug support.
 ```
 
-## Skill 目录约定
-
-每个正式 skill 放在 `skills/<skill-name>/` 下，并尽量使用以下结构：
+Use `embedded-project-setup` when asking an agent for MCU firmware work:
 
 ```text
-skills/<skill-name>/
-├── SKILL.md
-├── agents/
-│   └── openai.yaml
-├── references/
-│   └── <domain>-blueprint.md
-└── scripts/
-    └── scaffold_<domain>_project.py
+Use $embedded-project-setup to scaffold STM32 firmware for an STM32G030C8T6 board with CMake, arm-none-eabi-gcc, OpenOCD, Cortex-Debug, clangd, formatting, analysis, and flash scripts.
 ```
 
-`SKILL.md` 必须包含 YAML frontmatter：
+Use `python-fastapi-setup` when asking an agent for FastAPI service work:
 
-```yaml
----
-name: skill-name
-description: Clear trigger description for when an agent should use this skill.
----
+```text
+Use $python-fastapi-setup to scaffold a FastAPI service named inventory_api with typed settings, lifespan-managed resources, request ID middleware, /health, tests, and Docker Compose.
 ```
 
-`description` 要写清楚触发场景、项目类型、核心工具链和 agent 应该使用它的时机。主体内容建议包含：
+## Skill Behavior At A Glance
 
-- Overview：这个 skill 解决什么问题
-- Workflow：agent 应该如何判断、生成或改造项目
-- Validation：本地可执行的验证命令
-- References：需要读取哪些参考文档或脚本
-
-## 使用脚手架脚本
-
-脚本默认用 Python 标准库实现，方便 agent 在干净环境里直接运行。
-
-创建 C++ 项目：
-
-```bash
-python3 skills/cpp-project-setup/scripts/scaffold_cpp_project.py \
-  --name my_app \
-  --out /tmp/my_app
-```
-
-创建嵌入式项目：
-
-```bash
-python3 skills/embedded-project-setup/scripts/scaffold_embedded_project.py \
-  --name firmware \
-  --out /tmp/firmware
-```
-
-生成到真实工作区前，建议先输出到临时目录检查文件结构和默认配置。
-
-## 新增 Skill 流程
-
-1. 新建 `skills/<skill-name>/SKILL.md`，可参考已有 skill 的结构，但不要保留占位模板作为可安装 skill。
-2. 写清楚 frontmatter 中的 `name` 和 `description`。
-3. 在 `SKILL.md` 中定义 agent 的判断逻辑、默认方案、生成流程和验证步骤。
-4. 如需生成项目文件，添加 `scripts/` 下的脚手架脚本，并保持可重复、可参数化。
-5. 如需长篇背景、架构蓝图或命令细节，放入 `references/`，不要把所有细节塞进 `SKILL.md`。
-6. 如需在支持的界面里显示 skill 信息，添加 `agents/openai.yaml`。
-7. 用临时目录运行脚本，确认生成结果可用，再提交修改。
-
-## 维护原则
-
-- skills 应该描述“agent 如何可靠完成任务”，不是只写人类教程。
-- 生成脚本要偏保守：默认创建清晰的最小可用项目，不假设全局机器状态。
-- 参考文档可以详细，`SKILL.md` 要可快速执行。
-- 改已有 skill 前先读它的 `SKILL.md`、`references/` 和 `scripts/`。
-- 验证失败或依赖缺失时，在结果中明确说明跳过了什么、为什么跳过。
+| Skill | Greenfield Default | Existing Project Behavior | Validation Focus |
+| --- | --- | --- | --- |
+| `cpp-project-setup` | App plus reusable library target, C++20, vcpkg, GoogleTest, format/lint/docs, VS Code integration. | Inventory the current build, dependency, editor, test, lint, docs, CI, and packaging setup before making scoped changes. | CMake presets, vcpkg bootstrap, build, `ctest`, formatting, clang-tidy, and docs generation when tools are available. |
+| `embedded-project-setup` | Minimal STM32/Cortex-M firmware scaffold with CMake presets, cross toolchain, startup/linker files, smoke code, flash/debug entry points. | Inspect existing firmware layers, build scripts, toolchain files, linker/startup flow, vendor model, debug scripts, editor settings, and CI before editing. | Configure/build, firmware artifacts, formatting, static analysis, and optional hardware flashing/debug validation when hardware is attached. |
+| `python-fastapi-setup` | Minimal FastAPI service with app factory, versioned routers, typed settings, request ID middleware, health check, tests, and optional Docker files. | Inspect existing ASGI entrypoints, route contracts, settings, middleware, dependency manager, tests, and startup commands before preserving behavior in a standard layout. | Python compile/import checks, pytest, Uvicorn health smoke, optional Gunicorn smoke, and optional Docker build/run health checks. |
 
 ## License
 
-MIT License. 这个许可证允许他人自由使用、修改、分发和集成这些 skills，只要求保留版权和许可证声明。
+MIT License.

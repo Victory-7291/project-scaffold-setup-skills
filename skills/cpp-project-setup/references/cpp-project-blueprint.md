@@ -23,6 +23,36 @@ Git
        -> Doxygen
 ```
 
+## Discovery First
+
+Before generating or patching files, classify the user's workspace:
+
+- Greenfield: the target directory is empty or clearly meant to be created.
+- Existing project: the directory already has source files, build metadata, scripts, editor settings, CI, docs, or git history.
+
+For existing projects, write down the current pipeline before editing:
+
+- Build system: CMake, Make, Meson, Bazel, Visual Studio solutions, ad hoc scripts, or mixed.
+- Dependency model: vcpkg, Conan, FetchContent, submodules, system packages, vendored code, or none.
+- Compiler and standard: Clang/GCC/MSVC, C++ version, warnings, platform assumptions.
+- Developer entry points: presets, shell scripts, PowerShell scripts, VS Code tasks, Make targets, CI jobs.
+- Quality gates: tests, format, lint, static analysis, docs, packaging, install/export rules.
+
+Modernize by filling gaps in that pipeline instead of replacing a working build graph.
+
+## Host Profiles
+
+Choose the developer host profile from the user's real machine, not necessarily the agent sandbox:
+
+| Host profile | vcpkg triplet | Default compiler/debugger | Notes |
+| --- | --- | --- | --- |
+| `macos-arm64` | `arm64-osx` | Clang + CodeLLDB | Apple Silicon Homebrew installs are usually under `/opt/homebrew`. |
+| `macos-x64` | `x64-osx` | Clang + CodeLLDB | Intel Homebrew installs are often under `/usr/local`. |
+| `linux-x64` | `x64-linux` | GCC or Clang + CodeLLDB | Use distro packages for CMake, Ninja, LLVM tools, Doxygen, and build essentials. |
+| `linux-arm64` | `arm64-linux` | GCC or Clang + CodeLLDB | Same project shape as Linux x64, different vcpkg triplet and package availability. |
+| `windows-x64` | `x64-windows` | MSVC + `cppvsdbg` | Run CMake from a Visual Studio Developer PowerShell or Developer Command Prompt. |
+| `windows-arm64` | `arm64-windows` | MSVC ARM64 + `cppvsdbg` | Install the ARM64 C++ build tools workload. |
+
 ## Greenfield Layout
 
 Prefer this structure for a new project:
@@ -49,6 +79,7 @@ project/
     bootstrap_vcpkg.sh
     bootstrap_vcpkg.ps1
     format.sh
+    format.ps1
   .vscode/
     extensions.json
     settings.json
@@ -78,8 +109,11 @@ project/
 - Provide a shell bootstrap for macOS/Linux and a PowerShell bootstrap for Windows when generating a cross-platform scaffold.
 - Use triplets in presets:
   - macOS Apple Silicon: `arm64-osx`
+  - macOS Intel: `x64-osx`
   - Linux x64: `x64-linux`
+  - Linux arm64: `arm64-linux`
   - Windows x64: `x64-windows`
+  - Windows arm64: `arm64-windows`
 
 ## VS Code Decisions
 
@@ -95,16 +129,16 @@ Use these local checks where possible:
 
 ```bash
 bash scripts/bootstrap_vcpkg.sh
-cmake --preset macos-debug
-cmake --build --preset macos-debug
-ctest --test-dir build/macos-debug --output-on-failure
+cmake --preset macos-arm64-debug
+cmake --build --preset macos-arm64-debug
+ctest --test-dir build/macos-arm64-debug --output-on-failure
 bash scripts/format.sh --check
-cmake --preset macos-tidy
-cmake --build --preset macos-tidy
-cmake --build --preset macos-debug --target docs
+cmake --preset macos-arm64-tidy
+cmake --build --preset macos-arm64-tidy
+cmake --build --preset macos-arm64-debug --target docs
 ```
 
-Use Linux or Windows preset names on those platforms.
+Use the selected host profile's preset names on Linux, Windows, or non-arm64 macOS. On Windows, prefer the generated PowerShell scripts.
 
 ## Existing Project Rules
 

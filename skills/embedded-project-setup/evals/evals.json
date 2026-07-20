@@ -1,0 +1,51 @@
+{
+  "skill_name": "embedded-project-setup",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need a new STM32 firmware project for a smart sensor node. I'm on macOS Apple Silicon. Use the default STM32G030C8T6 target, create the project in /tmp/embedded_eval_smart_sensor, and set up CMake, Ninja, arm-none-eabi-gcc, clang-format, clang-tidy, OpenOCD, and Cortex-Debug in VS Code.",
+      "expected_output": "A greenfield STM32G030C8T6 firmware project with CMakePresets.json, toolchain file, startup code, linker script, layered src/app and src/bsp, build/format/analyze/flash/openocd scripts, .vscode configs, Dockerfile, and GitHub Actions workflow.",
+      "files": [],
+      "expectations": [
+        "CMakeLists.txt targets the arm-none-eabi-gcc toolchain and produces an ELF",
+        "cmake/arm-none-eabi-gcc.cmake sets CMAKE_SYSTEM_NAME Generic and uses arm-none-eabi-gcc",
+        "CMakePresets.json contains stm32-debug, stm32-release, and stm32-analyze presets",
+        "startup/startup.c provides a vector table and Reset_Handler",
+        "ldscripts/smart_sensor_flash.ld defines FLASH and RAM regions matching STM32G030C8T6 (64K flash, 8K RAM)",
+        ".vscode/launch.json has a cortex-debug configuration using OpenOCD",
+        "scripts/flash.sh and scripts/openocd_server.sh reference stlink and stm32g0x cfg files",
+        "README.md mentions macOS Apple Silicon host profile and build/flash commands"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Create an STM32 firmware project in /tmp/embedded_eval_motor_ctrl for the NUCLEO-F446RE board (STM32F446RE, Cortex-M4, 512 KiB flash, 128 KiB RAM, FPU fpv4-sp-d16, hard float). Use OpenOCD target stm32f4x and ST-Link. Include a layered application with app/, bsp/, and drivers/ directories, plus CMSIS/HAL placeholders in the README.",
+      "expected_output": "A custom STM32F446RE firmware scaffold with correct CPU/FPU/float-abi flags, linker script sizes, OpenOCD config, and layered source tree.",
+      "files": [],
+      "expectations": [
+        "CMakeLists.txt passes -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard",
+        "CMakePresets.json has stm32-debug, stm32-release, and stm32-analyze presets",
+        "ldscripts/motor_ctrl_flash.ld has 512K flash and 128K RAM lengths",
+        ".vscode/launch.json references interface/stlink.cfg and target/stm32f4x.cfg",
+        "src/ contains app/, bsp/, and drivers/ subdirectories",
+        "README.md notes the STM32F446RE target and suggests CMSIS/HAL integration"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Modernize an existing firmware project in /tmp/embedded_eval_cubemx_legacy. It currently has a Keil .uvprojx, CubeMX-generated Src/Inc folders with HAL files, and an ST-Link debug setup. Convert it to CMake + Ninja + arm-none-eabi-gcc, add clang-format/clang-tidy, OpenOCD flash/debug scripts, and VS Code Cortex-Debug. Preserve the existing HAL-based application code.",
+      "expected_output": "The existing CubeMX/Keil firmware is modernized with CMake, presets, toolchain file, clang-format/tidy, OpenOCD scripts, and VS Code configs while keeping the HAL application intact.",
+      "files": [],
+      "expectations": [
+        "Existing Src/ and Inc/ HAL application files are preserved, not deleted",
+        "CMakeLists.txt is added and configured for arm-none-eabi-gcc",
+        "cmake/arm-none-eabi-gcc.cmake is created",
+        "CMakePresets.json with stm32-debug, stm32-release, and stm32-analyze is created",
+        ".clang-format, .clang-tidy, and .clangd are added",
+        ".vscode/launch.json uses cortex-debug with OpenOCD",
+        "scripts/flash.sh and scripts/openocd_server.sh are added",
+        "README.md documents the new build/flash workflow"
+      ]
+    }
+  ]
+}

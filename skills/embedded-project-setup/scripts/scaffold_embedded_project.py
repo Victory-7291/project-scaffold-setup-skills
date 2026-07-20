@@ -4,10 +4,116 @@
 from __future__ import annotations
 
 import argparse
+import platform
 import re
 import stat
 import textwrap
 from pathlib import Path
+
+
+HOST_PROFILES = {
+    "macos-arm64": {
+        "setup": """macOS Apple Silicon:
+
+```bash
+brew install cmake ninja open-ocd arm-none-eabi-gcc arm-none-eabi-gdb llvm
+```""",
+        "format": "bash scripts/format.sh --check",
+        "build": "bash scripts/build.sh",
+        "analyze": "bash scripts/analyze.sh",
+        "flash": "bash scripts/flash.sh",
+        "openocd": "bash scripts/openocd_server.sh",
+        "shell": "bash",
+    },
+    "macos-x64": {
+        "setup": """macOS Intel:
+
+```bash
+brew install cmake ninja open-ocd arm-none-eabi-gcc arm-none-eabi-gdb llvm
+```""",
+        "format": "bash scripts/format.sh --check",
+        "build": "bash scripts/build.sh",
+        "analyze": "bash scripts/analyze.sh",
+        "flash": "bash scripts/flash.sh",
+        "openocd": "bash scripts/openocd_server.sh",
+        "shell": "bash",
+    },
+    "linux-x64": {
+        "setup": """Ubuntu/Debian Linux x64:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y cmake ninja-build gcc-arm-none-eabi binutils-arm-none-eabi gdb-multiarch openocd clang-format clang-tidy
+```""",
+        "format": "bash scripts/format.sh --check",
+        "build": "bash scripts/build.sh",
+        "analyze": "bash scripts/analyze.sh",
+        "flash": "bash scripts/flash.sh",
+        "openocd": "bash scripts/openocd_server.sh",
+        "shell": "bash",
+    },
+    "linux-arm64": {
+        "setup": """Ubuntu/Debian Linux arm64:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y cmake ninja-build gcc-arm-none-eabi binutils-arm-none-eabi gdb-multiarch openocd clang-format clang-tidy
+```""",
+        "format": "bash scripts/format.sh --check",
+        "build": "bash scripts/build.sh",
+        "analyze": "bash scripts/analyze.sh",
+        "flash": "bash scripts/flash.sh",
+        "openocd": "bash scripts/openocd_server.sh",
+        "shell": "bash",
+    },
+    "windows-x64": {
+        "setup": """Windows x64:
+
+Install CMake, Ninja, Git, VS Code, the Arm GNU Toolchain for Windows,
+OpenOCD, and LLVM tools. Add `arm-none-eabi-gcc`, `arm-none-eabi-gdb`,
+`openocd`, `clang-format`, and `clang-tidy` to `PATH`.
+Use the generated PowerShell scripts below.
+""",
+        "format": "pwsh scripts/format.ps1 -Check",
+        "build": "pwsh scripts/build.ps1",
+        "analyze": "pwsh scripts/analyze.ps1",
+        "flash": "pwsh scripts/flash.ps1",
+        "openocd": "pwsh scripts/openocd_server.ps1",
+        "shell": "powershell",
+    },
+    "windows-arm64": {
+        "setup": """Windows arm64:
+
+Install CMake, Ninja, Git, VS Code, the Arm GNU Toolchain for Windows,
+OpenOCD, and LLVM tools. Prefer native arm64 packages when available and add
+`arm-none-eabi-gcc`, `arm-none-eabi-gdb`, `openocd`, `clang-format`, and
+`clang-tidy` to `PATH`. Use the generated PowerShell scripts below.
+""",
+        "format": "pwsh scripts/format.ps1 -Check",
+        "build": "pwsh scripts/build.ps1",
+        "analyze": "pwsh scripts/analyze.ps1",
+        "flash": "pwsh scripts/flash.ps1",
+        "openocd": "pwsh scripts/openocd_server.ps1",
+        "shell": "powershell",
+    },
+}
+
+
+def detect_host_platform() -> str:
+    system = platform.system().lower()
+    machine = platform.machine().lower()
+    is_arm = machine in {"arm64", "aarch64"} or machine.startswith("armv")
+    is_x64 = machine in {"x86_64", "amd64", "x64"}
+
+    if system == "darwin":
+        return "macos-arm64" if is_arm else "macos-x64"
+    if system == "linux":
+        return "linux-arm64" if is_arm else "linux-x64"
+    if system == "windows":
+        return "windows-arm64" if is_arm else "windows-x64"
+    if is_x64:
+        return "linux-x64"
+    raise ValueError(f"unsupported host platform: system={platform.system()} machine={platform.machine()}")
 
 
 def safe_name(value: str) -> str:
@@ -51,6 +157,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Create a modern STM32 embedded C project scaffold.")
     parser.add_argument("--name", required=True, help="Firmware target name, for example smart_lock_fw")
     parser.add_argument("--out", help="Output directory. Defaults to ./<sanitized-name>.")
+    parser.add_argument(
+        "--host-platform",
+        default="auto",
+        choices=["auto", *HOST_PROFILES.keys()],
+        help="Developer host profile used for README commands and script recommendations",
+    )
     parser.add_argument("--mcu", default="stm32g030c8t6", help="MCU name used in docs and VS Code")
     parser.add_argument("--device-define", default="STM32G030xx", help="Preprocessor define for vendor headers")
     parser.add_argument("--cpu", default="cortex-m0plus", help="GCC -mcpu value")
@@ -64,6 +176,9 @@ def main() -> int:
     parser.add_argument("--clangd-preset", default="stm32-debug", help="Preset whose build dir clangd should read")
     parser.add_argument("--force", action="store_true", help="Overwrite scaffold-owned files if they already exist")
     args = parser.parse_args()
+
+    host_platform = detect_host_platform() if args.host_platform == "auto" else args.host_platform
+    host_profile = HOST_PROFILES[host_platform]
 
     target = safe_name(args.name)
     cmake_name = cmake_project_name(args.name)
@@ -92,6 +207,14 @@ def main() -> int:
         "OPENOCD_TARGET": args.openocd_target,
         "CLANGD_PRESET": args.clangd_preset,
         "UPPER": target.upper(),
+        "HOST_PLATFORM": host_platform,
+        "HOST_SETUP": host_profile["setup"].strip(),
+        "HOST_FORMAT_COMMAND": host_profile["format"],
+        "HOST_BUILD_COMMAND": host_profile["build"],
+        "HOST_ANALYZE_COMMAND": host_profile["analyze"],
+        "HOST_FLASH_COMMAND": host_profile["flash"],
+        "HOST_OPENOCD_COMMAND": host_profile["openocd"],
+        "HOST_SHELL": host_profile["shell"],
     }
 
     files = {
@@ -621,6 +744,42 @@ def main() -> int:
             """,
             **values,
         ),
+        "scripts/format.ps1": render(
+            """
+            param(
+              [switch]$Check
+            )
+
+            $ErrorActionPreference = "Stop"
+            $RootDir = Resolve-Path (Join-Path $PSScriptRoot "..")
+            $SearchRoots = @("include", "src", "startup")
+            $Extensions = @(".h", ".c")
+
+            if (-not (Get-Command clang-format -ErrorAction SilentlyContinue)) {
+              throw "clang-format is required"
+            }
+
+            $Files = @()
+            foreach ($SearchRoot in $SearchRoots) {
+              $Path = Join-Path $RootDir $SearchRoot
+              if (Test-Path $Path) {
+                $Files += Get-ChildItem $Path -Recurse -File | Where-Object { $Extensions -contains $_.Extension }
+              }
+            }
+
+            if ($Files.Count -eq 0) {
+              exit 0
+            }
+
+            $FilePaths = @($Files | ForEach-Object { $_.FullName })
+            if ($Check) {
+              clang-format --dry-run --Werror @FilePaths
+            } else {
+              clang-format -i @FilePaths
+            }
+            """,
+            **values,
+        ),
         "scripts/build.sh": render(
             """
             #!/usr/bin/env bash
@@ -640,6 +799,28 @@ def main() -> int:
             """,
             **values,
         ),
+        "scripts/build.ps1": render(
+            """
+            $ErrorActionPreference = "Stop"
+
+            $RootDir = Resolve-Path (Join-Path $PSScriptRoot "..")
+            $Preset = if ($env:PRESET) { $env:PRESET } else { "stm32-debug" }
+
+            Push-Location $RootDir
+            try {
+              cmake --preset $Preset
+
+              $BuildArgs = @("--build", "--preset", $Preset)
+              if ($env:JOBS) {
+                $BuildArgs += @("--parallel", $env:JOBS)
+              }
+              cmake @BuildArgs
+            } finally {
+              Pop-Location
+            }
+            """,
+            **values,
+        ),
         "scripts/analyze.sh": render(
             """
             #!/usr/bin/env bash
@@ -647,6 +828,20 @@ def main() -> int:
 
             ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
             PRESET=stm32-analyze "${ROOT_DIR}/scripts/build.sh"
+            """,
+            **values,
+        ),
+        "scripts/analyze.ps1": render(
+            """
+            $ErrorActionPreference = "Stop"
+
+            $PreviousPreset = $env:PRESET
+            $env:PRESET = "stm32-analyze"
+            try {
+              & (Join-Path $PSScriptRoot "build.ps1")
+            } finally {
+              $env:PRESET = $PreviousPreset
+            }
             """,
             **values,
         ),
@@ -668,6 +863,23 @@ def main() -> int:
             """,
             **values,
         ),
+        "scripts/flash.ps1": render(
+            """
+            $ErrorActionPreference = "Stop"
+
+            $RootDir = Resolve-Path (Join-Path $PSScriptRoot "..")
+            $Preset = if ($env:PRESET) { $env:PRESET } else { "stm32-debug" }
+            $Elf = Join-Path $RootDir "build/$Preset/@TARGET@.elf"
+
+            & (Join-Path $PSScriptRoot "build.ps1")
+
+            openocd `
+              -f "interface/@OPENOCD_INTERFACE@.cfg" `
+              -f "target/@OPENOCD_TARGET@.cfg" `
+              -c "program `"$Elf`" verify reset exit"
+            """,
+            **values,
+        ),
         "scripts/openocd_server.sh": render(
             """
             #!/usr/bin/env bash
@@ -675,6 +887,16 @@ def main() -> int:
 
             openocd \
               -f "interface/@OPENOCD_INTERFACE@.cfg" \
+              -f "target/@OPENOCD_TARGET@.cfg"
+            """,
+            **values,
+        ),
+        "scripts/openocd_server.ps1": render(
+            """
+            $ErrorActionPreference = "Stop"
+
+            openocd `
+              -f "interface/@OPENOCD_INTERFACE@.cfg" `
               -f "target/@OPENOCD_TARGET@.cfg"
             """,
             **values,
@@ -771,44 +993,39 @@ def main() -> int:
             Modern STM32/Cortex-M firmware scaffold for @MCU@ using VS Code, clangd,
             CMake presets, Ninja, arm-none-eabi-gcc, OpenOCD, and Cortex-Debug.
 
-            ## Toolchain
+            ## Host Toolchain
 
-            macOS:
+            Selected host profile: `@HOST_PLATFORM@`
 
-            ```bash
-            brew install cmake ninja open-ocd arm-none-eabi-gcc arm-none-eabi-gdb llvm
-            ```
+            @HOST_SETUP@
+
+            If you are generating this project for another machine, rerun the scaffold with
+            `--host-platform macos-arm64`, `macos-x64`, `linux-x64`, `linux-arm64`,
+            `windows-x64`, or `windows-arm64`.
 
             ## Build
 
-            ```bash
-            cmake --preset stm32-debug
-            cmake --build --preset stm32-debug
-            ```
-
-            Or:
-
-            ```bash
-            bash scripts/build.sh
+            ```@HOST_SHELL@
+            @HOST_BUILD_COMMAND@
             ```
 
             ## Analyze
 
-            ```bash
-            bash scripts/analyze.sh
+            ```@HOST_SHELL@
+            @HOST_ANALYZE_COMMAND@
             ```
 
             ## Format
 
-            ```bash
-            bash scripts/format.sh --check
+            ```@HOST_SHELL@
+            @HOST_FORMAT_COMMAND@
             ```
 
             ## Flash and Debug
 
-            ```bash
-            bash scripts/flash.sh
-            bash scripts/openocd_server.sh
+            ```@HOST_SHELL@
+            @HOST_FLASH_COMMAND@
+            @HOST_OPENOCD_COMMAND@
             ```
 
             The generated BSP is a minimal @MCU@ smoke example. Replace it with CMSIS,
@@ -830,10 +1047,10 @@ def main() -> int:
         write_file(root, resolved_relative, content, executable=resolved_relative in executable_files, force=args.force)
 
     print(f"Created embedded firmware project at {root}")
+    print(f"Host profile: {host_platform}")
     print("Next steps:")
-    print("  cmake --preset stm32-debug")
-    print("  cmake --build --preset stm32-debug")
-    print("  bash scripts/flash.sh   # when hardware is attached")
+    print(f"  {host_profile['build']}")
+    print(f"  {host_profile['flash']}   # when hardware is attached")
     return 0
 
 

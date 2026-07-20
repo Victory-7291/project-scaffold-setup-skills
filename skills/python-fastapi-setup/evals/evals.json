@@ -1,0 +1,48 @@
+{
+  "skill_name": "python-fastapi-setup",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a new FastAPI service named 'inventory_api' in /tmp/fastapi_eval_inventory_api. It needs typed environment settings, a /health endpoint, request ID middleware, browser CORS support for local frontend development, pytest coverage, and Docker Compose for local container testing.",
+      "expected_output": "A greenfield FastAPI service with app/main.py, pydantic-settings config, versioned API router package, /health test coverage, request ID middleware, Dockerfile, docker-compose.yml, and direct Uvicorn/FastAPI startup commands.",
+      "files": [],
+      "expectations": [
+        "The project contains app/main.py exporting a FastAPI app and registering routers in one place",
+        "app/core/config.py defines typed settings with pydantic-settings and a cached settings getter",
+        "A GET /health endpoint is implemented and covered by tests/test_health.py",
+        "Request ID middleware is present and the health test checks for an x-request-id header",
+        "Dockerfile and docker-compose.yml are generated because container testing was requested",
+        "The documented default startup path uses direct Uvicorn or FastAPI CLI commands instead of a wrapper script",
+        "Generated production/container configuration does not use the deprecated uvicorn.workers module"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Set up a new FastAPI service called 'reports_api' in /tmp/fastapi_eval_reports_api. I don't need Docker, but I do need a clean pattern for long-lived process resources because later we'll add a search client and background indexer. Please include the lifespan/app.state/dependency-accessor pattern and a minimal test suite.",
+      "expected_output": "A FastAPI project without Docker files, using lifespan as the composition root, app.state for process-level resources/settings, typed dependency accessors, and a health test.",
+      "files": [],
+      "expectations": [
+        "app/main.py defines or documents a lifespan function for process-level resources",
+        "app/api/v1/dependencies.py contains typed dependency accessors rather than endpoint-level service construction",
+        "No Dockerfile or docker-compose.yml is added because Docker was not requested",
+        "No gunicorn.conf.py is added because a separate process manager was not requested",
+        "The generated README includes direct local run and test commands",
+        "The scaffold keeps baseline tests independent of external services"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Modernize the existing FastAPI project in /tmp/fastapi_eval_legacy_service. It currently has a single app.py with GET /health returning {\"status\":\"ok\"}, GET /items returning [{\"id\":1,\"name\":\"Widget\"},{\"id\":2,\"name\":\"Gadget\"}], plus run_service.py that shells out to uvicorn. Keep those exact endpoint paths and response payloads, move to a standard app/main.py layout with routers, add typed settings, tests, and replace the wrapper launcher with documented direct startup commands.",
+      "expected_output": "The legacy FastAPI app is refactored into the standard layout without losing the exact /items or /health behavior; run_service.py is removed or deprecated in favor of direct commands; tests cover the preserved endpoints and assert the Widget/Gadget payload.",
+      "files": [],
+      "expectations": [
+        "Existing /items behavior is preserved in the modernized app",
+        "The ASGI app is exposed from app/main.py",
+        "Routes are split into router modules instead of remaining in one app.py file",
+        "run_service.py is removed or clearly replaced by documented direct Uvicorn commands",
+        "Tests cover both /health and the preserved /items endpoint",
+        "The modernization preserves the existing dependency manager when one is present"
+      ]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 ---
 name: cpp-project-setup
-description: Set up or modernize host-side C++ CMake projects with Git/GitHub, VS Code, CMake Tools, clangd, CodeLLDB on macOS/Linux, cppvsdbg on Windows, CMakePresets.json, vcpkg manifest mode, platform triplets, Ninja, Clang/GCC/MSVC, GoogleTest, clang-format, clang-tidy, Doxygen, and CI-ready structure. Use when Codex is asked to bootstrap, standardize, or modernize a C++ app/library; create VS Code C++ settings; add vcpkg/CMake presets; establish tests, linting, formatting, docs, or a reproducible developer workflow. Prefer embedded-project-setup for MCU firmware, OpenOCD, startup/linker scripts, arm-none-eabi, or Cortex-Debug tasks.
+description: Create, modify or improve modern C++ CMake projects with platform-aware toolchains for macOS/Linux/Windows on arm64 or x64: Git/GitHub, VS Code, CMake Tools, clangd, CodeLLDB on macOS/Linux, cppvsdbg on Windows, CMakePresets.json, vcpkg manifest mode, Ninja, Clang/GCC/MSVC, GoogleTest, clang-format, clang-tidy, Doxygen, and CI-ready structure. Use when users is asked to bootstrap a new C++ app/library, inspect and modernize an existing C++ project, create VS Code C++ settings, add vcpkg/CMake presets, or establish tests/lint/format/docs/reproducible developer workflow. Prefer embedded-project-setup for MCU firmware, OpenOCD, startup/linker scripts, arm-none-eabi, or Cortex-Debug tasks.
 ---
 
 # Modern C++ Project Setup
@@ -13,40 +13,49 @@ Create or modernize a C++ project around a reproducible toolchain:
 Git -> GitHub -> VS Code -> CMakePresets + vcpkg -> Ninja -> compiler -> tests/lint/docs
 ```
 
-Prefer project-local, repeatable setup over global machine assumptions. Use the bundled scaffold script for greenfield projects; patch existing projects carefully after reading their current CMake, dependency, and editor configuration.
+Prefer project-local, repeatable setup over global machine assumptions. First classify the user's working directory and host platform, then either generate a greenfield scaffold or patch the existing project without erasing its current pipeline.
 
 ## Workflow
 
-1. Determine whether the task is greenfield or an existing project.
+1. Determine the user's working directory and whether a project already exists.
+   - Check the user-provided path or current working directory before writing files.
+   - Treat the directory as an existing project if it already has source files, `CMakeLists.txt`, build scripts, package metadata, editor config, CI, docs, or a git history.
+   - For existing work, inventory the full development pipeline before editing: build system, dependency manager, compiler and standard, presets/tasks/scripts, tests, format/lint/static analysis, docs, debugger/editor integration, CI, packaging/install rules, and generated artifacts.
    - For greenfield work, default to an app plus reusable library target, C++20, Ninja, vcpkg manifest mode, GoogleTest, clang-format, clang-tidy, Doxygen, and VS Code settings.
-   - For existing work, inspect `CMakeLists.txt`, `CMakePresets.json`, `vcpkg.json`, `.vscode/`, `.clangd`, `.clang-format`, `.clang-tidy`, CI files, and local docs before editing.
    - If the request is about MCU firmware, OpenOCD, linker scripts, startup code, `arm-none-eabi`, or Cortex-Debug, switch to `embedded-project-setup`.
 
-2. Generate or update the project.
+2. Detect the user's host development environment.
+   - Determine OS and architecture: macOS/Linux/Windows plus arm64 or x64. Use local commands such as `uname -s`, `uname -m`, `sysctl -n machdep.cpu.brand_string`, or PowerShell/.NET runtime information where appropriate.
+   - Select a host profile: `macos-arm64`, `macos-x64`, `linux-x64`, `linux-arm64`, `windows-x64`, or `windows-arm64`.
+   - If the agent is running somewhere other than the user's real development machine, ask for the user's OS/architecture instead of assuming the sandbox matches their workstation.
+
+3. Generate or update the project.
    - For greenfield scaffolding, run from this skill directory:
 
 ```bash
 python3 scripts/scaffold_cpp_project.py \
   --name my_app \
-  --out /path/to/workspace/my_app
+  --out /path/to/workspace/my_app \
+  --host-platform macos-arm64
 ```
 
    - For existing projects, use `references/cpp-project-blueprint.md` as a checklist and adapt to the repository's current style instead of replacing unrelated files.
+   - Omit `--host-platform` only when generating on the same machine where the project will be developed; the script will auto-detect that host.
 
-3. Keep the toolchain contract explicit.
+4. Keep the toolchain contract explicit.
    - Use `CMakePresets.json` for configure/build profiles.
    - Use vcpkg manifest mode through `vcpkg.json`.
-   - Use triplets such as `arm64-osx`, `x64-linux`, and `x64-windows`.
+   - Use host-specific vcpkg triplets such as `arm64-osx`, `x64-osx`, `x64-linux`, `arm64-linux`, `x64-windows`, and `arm64-windows`.
    - Use Ninja as the generator unless the user or platform requires otherwise.
    - Use Clang on macOS, GCC on Linux, and MSVC on Windows by default.
 
-4. Wire editor support.
+5. Wire editor support.
    - Recommend VS Code extensions: CMake Tools, clangd, CodeLLDB for macOS/Linux, and Microsoft C/C++ debugging support for Windows.
    - Disable competing IntelliSense when clangd is responsible for semantic analysis.
    - Make `compile_commands.json` available through CMake configure output and point clangd at the active preset's build directory.
    - Add launch configurations for the generated executable on macOS/Linux and Windows when creating a cross-platform scaffold.
 
-5. Add quality gates.
+6. Add quality gates.
    - Add GoogleTest tests with `ctest`.
    - Add `.clang-format` and `.clang-tidy`.
    - Add a Doxygen configuration path, but do not require docs generation for a normal build.
@@ -57,17 +66,18 @@ python3 scripts/scaffold_cpp_project.py \
 Run the strongest available validation for the target machine:
 
 ```bash
+cmake --list-presets
 bash scripts/bootstrap_vcpkg.sh
-cmake --preset macos-debug
-cmake --build --preset macos-debug
-ctest --test-dir build/macos-debug --output-on-failure
+cmake --preset macos-arm64-debug
+cmake --build --preset macos-arm64-debug
+ctest --test-dir build/macos-arm64-debug --output-on-failure
 bash scripts/format.sh --check
-cmake --preset macos-tidy
-cmake --build --preset macos-tidy
-cmake --build --preset macos-debug --target docs
+cmake --preset macos-arm64-tidy
+cmake --build --preset macos-arm64-tidy
+cmake --build --preset macos-arm64-debug --target docs
 ```
 
-Adjust preset names for Linux or Windows. If vcpkg, compilers, or Doxygen are unavailable, report exactly what was skipped and why.
+Adjust preset names for the selected host profile. On Windows, use `pwsh scripts/bootstrap_vcpkg.ps1` and `pwsh scripts/format.ps1 -Check`. If vcpkg, compilers, or Doxygen are unavailable, report exactly what was skipped and why.
 
 ## References
 

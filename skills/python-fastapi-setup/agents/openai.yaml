@@ -1,0 +1,4 @@
+interface:
+  display_name: "FastAPI Setup"
+  short_description: "Build standard FastAPI servers"
+  default_prompt: "Use $python-fastapi-setup to scaffold or standardize a Python FastAPI service with settings, lifespan-managed resources, middleware, routers, tests, and deployment commands."

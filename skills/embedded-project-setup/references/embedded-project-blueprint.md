@@ -32,6 +32,37 @@ Git push
   -> release or artifact upload
 ```
 
+## Discovery First
+
+Before generating or patching files, classify the user's workspace:
+
+- Greenfield: the target directory is empty or clearly meant to be created.
+- Existing firmware: the directory already has source files, linker scripts, startup files, CubeMX metadata, vendor trees, build scripts, editor settings, CI, docs, or git history.
+
+For existing firmware, write down the current pipeline before editing:
+
+- Build system: CMake, Make, vendor IDE, CubeMX output, custom scripts, or mixed.
+- Toolchain: `arm-none-eabi-gcc`, vendor compiler, clang-based flow, compiler version, CPU/FPU/float ABI flags.
+- Firmware target: MCU, board, memory sizes, linker script, startup file, vector table, bootloader assumptions.
+- Dependency model: CMSIS, HAL, LL, bare-metal, submodules, vendored Cube trees, package managers.
+- Developer entry points: presets, scripts, VS Code tasks, flash/debug commands, OpenOCD/J-Link configs.
+- Quality gates: format, lint/static analysis, host tests, firmware artifacts, CI and release upload.
+
+Modernize by preserving proven hardware bring-up details and filling gaps in the toolchain.
+
+## Host Profiles
+
+Choose the developer host profile from the user's real machine, not necessarily the agent sandbox:
+
+| Host profile | Toolchain install path | Notes |
+| --- | --- | --- |
+| `macos-arm64` | Homebrew packages for CMake, Ninja, LLVM tools, OpenOCD, Arm GNU toolchain | Apple Silicon Homebrew installs are usually under `/opt/homebrew`. |
+| `macos-x64` | Homebrew packages for CMake, Ninja, LLVM tools, OpenOCD, Arm GNU toolchain | Intel Homebrew installs are often under `/usr/local`. |
+| `linux-x64` | Distro packages such as `gcc-arm-none-eabi`, `binutils-arm-none-eabi`, `gdb-multiarch`, `openocd` | Package names vary by distribution. |
+| `linux-arm64` | Same package families as Linux x64 | Some distros lag on embedded toolchain package versions. |
+| `windows-x64` | Arm GNU Toolchain for Windows, CMake, Ninja, OpenOCD, LLVM tools on `PATH` | Use PowerShell scripts or a shell with the same tools on `PATH`. |
+| `windows-arm64` | Native arm64 packages when available; otherwise compatible x64 tools | Verify debugger/probe drivers on the target machine. |
+
 ## Greenfield Layout
 
 Prefer this structure for a new firmware project:
@@ -59,10 +90,15 @@ firmware/
     <mcu>_flash.ld
   scripts/
     build.sh
+    build.ps1
     format.sh
+    format.ps1
     analyze.sh
+    analyze.ps1
     flash.sh
+    flash.ps1
     openocd_server.sh
+    openocd_server.ps1
   .vscode/
     extensions.json
     settings.json
@@ -110,7 +146,7 @@ Application
 
 - Use OpenOCD as the bridge between GDB and ST-Link/J-Link.
 - Use Cortex-Debug in VS Code for interactive debug.
-- Keep CLI scripts for build, format, analyze, flash, and OpenOCD server startup.
+- Keep shell and PowerShell scripts for build, format, analyze, flash, and OpenOCD server startup when generating a cross-platform scaffold.
 - Run flash/debug commands only when hardware is attached and the user expects hardware access.
 - If flashing fails, check power, SWD wiring, OpenOCD target file, probe interface file, and SWD speed.
 

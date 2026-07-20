@@ -4,10 +4,116 @@
 from __future__ import annotations
 
 import argparse
+import platform
 import re
 import stat
 import textwrap
 from pathlib import Path
+
+
+HOST_PROFILES = {
+    "macos-arm64": {
+        "debug_preset": "macos-arm64-debug",
+        "tidy_preset": "macos-arm64-tidy",
+        "bootstrap": "bash scripts/bootstrap_vcpkg.sh",
+        "format": "bash scripts/format.sh --check",
+        "shell": "bash",
+        "setup": """macOS Apple Silicon:
+
+```bash
+brew install cmake ninja llvm git doxygen
+bash scripts/bootstrap_vcpkg.sh
+```""",
+    },
+    "macos-x64": {
+        "debug_preset": "macos-x64-debug",
+        "tidy_preset": "macos-x64-tidy",
+        "bootstrap": "bash scripts/bootstrap_vcpkg.sh",
+        "format": "bash scripts/format.sh --check",
+        "shell": "bash",
+        "setup": """macOS Intel:
+
+```bash
+brew install cmake ninja llvm git doxygen
+bash scripts/bootstrap_vcpkg.sh
+```""",
+    },
+    "linux-x64": {
+        "debug_preset": "linux-x64-debug",
+        "tidy_preset": "linux-x64-tidy",
+        "bootstrap": "bash scripts/bootstrap_vcpkg.sh",
+        "format": "bash scripts/format.sh --check",
+        "shell": "bash",
+        "setup": """Ubuntu/Debian Linux x64:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y build-essential cmake ninja-build git clang clang-format clang-tidy lldb doxygen curl zip unzip tar pkg-config
+bash scripts/bootstrap_vcpkg.sh
+```""",
+    },
+    "linux-arm64": {
+        "debug_preset": "linux-arm64-debug",
+        "tidy_preset": "linux-arm64-tidy",
+        "bootstrap": "bash scripts/bootstrap_vcpkg.sh",
+        "format": "bash scripts/format.sh --check",
+        "shell": "bash",
+        "setup": """Ubuntu/Debian Linux arm64:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y build-essential cmake ninja-build git clang clang-format clang-tidy lldb doxygen curl zip unzip tar pkg-config
+bash scripts/bootstrap_vcpkg.sh
+```""",
+    },
+    "windows-x64": {
+        "debug_preset": "windows-x64-debug",
+        "tidy_preset": "windows-x64-tidy",
+        "bootstrap": "pwsh scripts/bootstrap_vcpkg.ps1",
+        "format": "pwsh scripts/format.ps1 -Check",
+        "shell": "powershell",
+        "setup": """Windows x64:
+
+Install Visual Studio 2022 Build Tools with the Desktop development with C++ workload,
+CMake, Ninja, Git, LLVM, and Doxygen. Then run from a Developer PowerShell:
+
+```powershell
+pwsh scripts/bootstrap_vcpkg.ps1
+```""",
+    },
+    "windows-arm64": {
+        "debug_preset": "windows-arm64-debug",
+        "tidy_preset": "windows-arm64-tidy",
+        "bootstrap": "pwsh scripts/bootstrap_vcpkg.ps1",
+        "format": "pwsh scripts/format.ps1 -Check",
+        "shell": "powershell",
+        "setup": """Windows arm64:
+
+Install Visual Studio 2022 Build Tools with ARM64 C++ tools, CMake, Ninja, Git,
+LLVM, and Doxygen. Then run from a Developer PowerShell:
+
+```powershell
+pwsh scripts/bootstrap_vcpkg.ps1
+```""",
+    },
+}
+
+
+def detect_host_platform() -> str:
+    system = platform.system().lower()
+    machine = platform.machine().lower()
+    is_arm = machine in {"arm64", "aarch64"} or machine.startswith("armv")
+    is_x64 = machine in {"x86_64", "amd64", "x64"}
+
+    if system == "darwin":
+        return "macos-arm64" if is_arm else "macos-x64"
+    if system == "linux":
+        return "linux-arm64" if is_arm else "linux-x64"
+    if system == "windows":
+        return "windows-arm64" if is_arm else "windows-x64"
+    if is_x64:
+        return "linux-x64"
+    raise ValueError(f"unsupported host platform: system={platform.system()} machine={platform.machine()}")
 
 
 def snake_name(value: str) -> str:
@@ -52,10 +158,21 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Create a modern C++ project scaffold.")
     parser.add_argument("--name", required=True, help="Project name, for example future_cv_tools")
     parser.add_argument("--out", help="Output directory. Defaults to ./<sanitized-name>.")
+    parser.add_argument(
+        "--host-platform",
+        default="auto",
+        choices=["auto", *HOST_PROFILES.keys()],
+        help="Developer host profile used for default presets and README commands",
+    )
     parser.add_argument("--cpp-standard", default="20", choices=["17", "20", "23"], help="C++ language standard")
-    parser.add_argument("--clangd-preset", default="macos-debug", help="Preset whose build directory clangd should read")
+    parser.add_argument("--clangd-preset", help="Preset whose build directory clangd should read")
     parser.add_argument("--force", action="store_true", help="Overwrite scaffold-owned files if they already exist")
     args = parser.parse_args()
+
+    host_platform = detect_host_platform() if args.host_platform == "auto" else args.host_platform
+    host_profile = HOST_PROFILES[host_platform]
+    clangd_preset = args.clangd_preset or host_profile["debug_preset"]
+    windows_debug_preset = "windows-arm64-debug" if host_platform == "windows-arm64" else "windows-x64-debug"
 
     target = snake_name(args.name)
     package = package_name(args.name)
@@ -73,7 +190,15 @@ def main() -> int:
         "NAMESPACE": namespace,
         "UPPER": upper,
         "CPP_STANDARD": args.cpp_standard,
-        "CLANGD_PRESET": args.clangd_preset,
+        "CLANGD_PRESET": clangd_preset,
+        "HOST_PLATFORM": host_platform,
+        "HOST_SETUP": host_profile["setup"].strip(),
+        "HOST_DEBUG_PRESET": host_profile["debug_preset"],
+        "HOST_TIDY_PRESET": host_profile["tidy_preset"],
+        "HOST_BOOTSTRAP_COMMAND": host_profile["bootstrap"],
+        "HOST_FORMAT_COMMAND": host_profile["format"],
+        "HOST_SHELL": host_profile["shell"],
+        "WINDOWS_DEBUG_PRESET": windows_debug_preset,
     }
 
     files = {
@@ -260,109 +385,211 @@ def main() -> int:
                   }
                 },
                 {
-                  "name": "macos-debug",
+                  "name": "macos-arm64-debug",
                   "inherits": "base",
-                  "displayName": "macOS Debug",
+                  "displayName": "macOS arm64 Debug",
                   "cacheVariables": {
                     "CMAKE_BUILD_TYPE": "Debug",
                     "VCPKG_TARGET_TRIPLET": "arm64-osx"
                   }
                 },
                 {
-                  "name": "macos-release",
+                  "name": "macos-arm64-release",
                   "inherits": "base",
-                  "displayName": "macOS Release",
+                  "displayName": "macOS arm64 Release",
                   "cacheVariables": {
                     "CMAKE_BUILD_TYPE": "Release",
                     "VCPKG_TARGET_TRIPLET": "arm64-osx"
                   }
                 },
                 {
-                  "name": "macos-tidy",
-                  "inherits": "macos-debug",
-                  "displayName": "macOS clang-tidy",
+                  "name": "macos-arm64-tidy",
+                  "inherits": "macos-arm64-debug",
+                  "displayName": "macOS arm64 clang-tidy",
                   "cacheVariables": {
                     "@UPPER@_ENABLE_CLANG_TIDY": "ON"
                   }
                 },
                 {
-                  "name": "linux-debug",
+                  "name": "macos-x64-debug",
                   "inherits": "base",
-                  "displayName": "Linux Debug",
+                  "displayName": "macOS x64 Debug",
+                  "cacheVariables": {
+                    "CMAKE_BUILD_TYPE": "Debug",
+                    "VCPKG_TARGET_TRIPLET": "x64-osx"
+                  }
+                },
+                {
+                  "name": "macos-x64-release",
+                  "inherits": "base",
+                  "displayName": "macOS x64 Release",
+                  "cacheVariables": {
+                    "CMAKE_BUILD_TYPE": "Release",
+                    "VCPKG_TARGET_TRIPLET": "x64-osx"
+                  }
+                },
+                {
+                  "name": "macos-x64-tidy",
+                  "inherits": "macos-x64-debug",
+                  "displayName": "macOS x64 clang-tidy",
+                  "cacheVariables": {
+                    "@UPPER@_ENABLE_CLANG_TIDY": "ON"
+                  }
+                },
+                {
+                  "name": "linux-x64-debug",
+                  "inherits": "base",
+                  "displayName": "Linux x64 Debug",
                   "cacheVariables": {
                     "CMAKE_BUILD_TYPE": "Debug",
                     "VCPKG_TARGET_TRIPLET": "x64-linux"
                   }
                 },
                 {
-                  "name": "linux-release",
+                  "name": "linux-x64-release",
                   "inherits": "base",
-                  "displayName": "Linux Release",
+                  "displayName": "Linux x64 Release",
                   "cacheVariables": {
                     "CMAKE_BUILD_TYPE": "Release",
                     "VCPKG_TARGET_TRIPLET": "x64-linux"
                   }
                 },
                 {
-                  "name": "linux-tidy",
-                  "inherits": "linux-debug",
-                  "displayName": "Linux clang-tidy",
+                  "name": "linux-x64-tidy",
+                  "inherits": "linux-x64-debug",
+                  "displayName": "Linux x64 clang-tidy",
                   "cacheVariables": {
                     "@UPPER@_ENABLE_CLANG_TIDY": "ON"
                   }
                 },
                 {
-                  "name": "windows-debug",
+                  "name": "linux-arm64-debug",
                   "inherits": "base",
-                  "displayName": "Windows Debug",
+                  "displayName": "Linux arm64 Debug",
+                  "cacheVariables": {
+                    "CMAKE_BUILD_TYPE": "Debug",
+                    "VCPKG_TARGET_TRIPLET": "arm64-linux"
+                  }
+                },
+                {
+                  "name": "linux-arm64-release",
+                  "inherits": "base",
+                  "displayName": "Linux arm64 Release",
+                  "cacheVariables": {
+                    "CMAKE_BUILD_TYPE": "Release",
+                    "VCPKG_TARGET_TRIPLET": "arm64-linux"
+                  }
+                },
+                {
+                  "name": "linux-arm64-tidy",
+                  "inherits": "linux-arm64-debug",
+                  "displayName": "Linux arm64 clang-tidy",
+                  "cacheVariables": {
+                    "@UPPER@_ENABLE_CLANG_TIDY": "ON"
+                  }
+                },
+                {
+                  "name": "windows-x64-debug",
+                  "inherits": "base",
+                  "displayName": "Windows x64 Debug",
                   "cacheVariables": {
                     "CMAKE_BUILD_TYPE": "Debug",
                     "VCPKG_TARGET_TRIPLET": "x64-windows"
                   }
                 },
                 {
-                  "name": "windows-release",
+                  "name": "windows-x64-release",
                   "inherits": "base",
-                  "displayName": "Windows Release",
+                  "displayName": "Windows x64 Release",
                   "cacheVariables": {
                     "CMAKE_BUILD_TYPE": "Release",
                     "VCPKG_TARGET_TRIPLET": "x64-windows"
                   }
                 },
                 {
-                  "name": "windows-tidy",
-                  "inherits": "windows-debug",
-                  "displayName": "Windows clang-tidy",
+                  "name": "windows-x64-tidy",
+                  "inherits": "windows-x64-debug",
+                  "displayName": "Windows x64 clang-tidy",
+                  "cacheVariables": {
+                    "@UPPER@_ENABLE_CLANG_TIDY": "ON"
+                  }
+                },
+                {
+                  "name": "windows-arm64-debug",
+                  "inherits": "base",
+                  "displayName": "Windows arm64 Debug",
+                  "cacheVariables": {
+                    "CMAKE_BUILD_TYPE": "Debug",
+                    "VCPKG_TARGET_TRIPLET": "arm64-windows"
+                  }
+                },
+                {
+                  "name": "windows-arm64-release",
+                  "inherits": "base",
+                  "displayName": "Windows arm64 Release",
+                  "cacheVariables": {
+                    "CMAKE_BUILD_TYPE": "Release",
+                    "VCPKG_TARGET_TRIPLET": "arm64-windows"
+                  }
+                },
+                {
+                  "name": "windows-arm64-tidy",
+                  "inherits": "windows-arm64-debug",
+                  "displayName": "Windows arm64 clang-tidy",
                   "cacheVariables": {
                     "@UPPER@_ENABLE_CLANG_TIDY": "ON"
                   }
                 }
               ],
               "buildPresets": [
-                { "name": "macos-debug", "configurePreset": "macos-debug" },
-                { "name": "macos-release", "configurePreset": "macos-release" },
-                { "name": "macos-tidy", "configurePreset": "macos-tidy" },
-                { "name": "linux-debug", "configurePreset": "linux-debug" },
-                { "name": "linux-release", "configurePreset": "linux-release" },
-                { "name": "linux-tidy", "configurePreset": "linux-tidy" },
-                { "name": "windows-debug", "configurePreset": "windows-debug" },
-                { "name": "windows-release", "configurePreset": "windows-release" },
-                { "name": "windows-tidy", "configurePreset": "windows-tidy" }
+                { "name": "macos-arm64-debug", "configurePreset": "macos-arm64-debug" },
+                { "name": "macos-arm64-release", "configurePreset": "macos-arm64-release" },
+                { "name": "macos-arm64-tidy", "configurePreset": "macos-arm64-tidy" },
+                { "name": "macos-x64-debug", "configurePreset": "macos-x64-debug" },
+                { "name": "macos-x64-release", "configurePreset": "macos-x64-release" },
+                { "name": "macos-x64-tidy", "configurePreset": "macos-x64-tidy" },
+                { "name": "linux-x64-debug", "configurePreset": "linux-x64-debug" },
+                { "name": "linux-x64-release", "configurePreset": "linux-x64-release" },
+                { "name": "linux-x64-tidy", "configurePreset": "linux-x64-tidy" },
+                { "name": "linux-arm64-debug", "configurePreset": "linux-arm64-debug" },
+                { "name": "linux-arm64-release", "configurePreset": "linux-arm64-release" },
+                { "name": "linux-arm64-tidy", "configurePreset": "linux-arm64-tidy" },
+                { "name": "windows-x64-debug", "configurePreset": "windows-x64-debug" },
+                { "name": "windows-x64-release", "configurePreset": "windows-x64-release" },
+                { "name": "windows-x64-tidy", "configurePreset": "windows-x64-tidy" },
+                { "name": "windows-arm64-debug", "configurePreset": "windows-arm64-debug" },
+                { "name": "windows-arm64-release", "configurePreset": "windows-arm64-release" },
+                { "name": "windows-arm64-tidy", "configurePreset": "windows-arm64-tidy" }
               ],
               "testPresets": [
                 {
-                  "name": "macos-debug",
-                  "configurePreset": "macos-debug",
+                  "name": "macos-arm64-debug",
+                  "configurePreset": "macos-arm64-debug",
                   "output": { "outputOnFailure": true }
                 },
                 {
-                  "name": "linux-debug",
-                  "configurePreset": "linux-debug",
+                  "name": "macos-x64-debug",
+                  "configurePreset": "macos-x64-debug",
                   "output": { "outputOnFailure": true }
                 },
                 {
-                  "name": "windows-debug",
-                  "configurePreset": "windows-debug",
+                  "name": "linux-x64-debug",
+                  "configurePreset": "linux-x64-debug",
+                  "output": { "outputOnFailure": true }
+                },
+                {
+                  "name": "linux-arm64-debug",
+                  "configurePreset": "linux-arm64-debug",
+                  "output": { "outputOnFailure": true }
+                },
+                {
+                  "name": "windows-x64-debug",
+                  "configurePreset": "windows-x64-debug",
+                  "output": { "outputOnFailure": true }
+                },
+                {
+                  "name": "windows-arm64-debug",
+                  "configurePreset": "windows-arm64-debug",
                   "output": { "outputOnFailure": true }
                 }
               ]
@@ -415,7 +642,7 @@ def main() -> int:
                   "name": "Debug @TARGET@_app (Windows MSVC)",
                   "type": "cppvsdbg",
                   "request": "launch",
-                  "program": "${workspaceFolder}/build/windows-debug/src/@TARGET@_app.exe",
+                  "program": "${workspaceFolder}/build/@WINDOWS_DEBUG_PRESET@/src/@TARGET@_app.exe",
                   "args": [],
                   "cwd": "${workspaceFolder}",
                   "console": "integratedTerminal"
@@ -547,6 +774,42 @@ def main() -> int:
             """,
             **values,
         ),
+        "scripts/format.ps1": render(
+            """
+            param(
+              [switch]$Check
+            )
+
+            $ErrorActionPreference = "Stop"
+            $RootDir = Resolve-Path (Join-Path $PSScriptRoot "..")
+            $SearchRoots = @("include", "src", "tests")
+            $Extensions = @(".hpp", ".h", ".cpp", ".cc")
+
+            if (-not (Get-Command clang-format -ErrorAction SilentlyContinue)) {
+              throw "clang-format is required"
+            }
+
+            $Files = @()
+            foreach ($SearchRoot in $SearchRoots) {
+              $Path = Join-Path $RootDir $SearchRoot
+              if (Test-Path $Path) {
+                $Files += Get-ChildItem $Path -Recurse -File | Where-Object { $Extensions -contains $_.Extension }
+              }
+            }
+
+            if ($Files.Count -eq 0) {
+              exit 0
+            }
+
+            $FilePaths = @($Files | ForEach-Object { $_.FullName })
+            if ($Check) {
+              clang-format --dry-run --Werror @FilePaths
+            } else {
+              clang-format -i @FilePaths
+            }
+            """,
+            **values,
+        ),
         ".gitignore": render(
             """
             build/
@@ -564,26 +827,32 @@ def main() -> int:
             Modern C++ scaffold using CMake presets, Ninja, vcpkg manifest mode, GoogleTest,
             clang-format, clang-tidy, Doxygen, and VS Code.
 
-            ## Setup
+            ## Host Toolchain
 
-            ```bash
-            brew install cmake ninja llvm git
-            bash scripts/bootstrap_vcpkg.sh
-            cmake --preset macos-debug
-            cmake --build --preset macos-debug
-            ctest --test-dir build/macos-debug --output-on-failure
+            Selected host profile: `@HOST_PLATFORM@`
+
+            @HOST_SETUP@
+
+            If you are generating this project for another machine, rerun the scaffold with
+            `--host-platform macos-arm64`, `macos-x64`, `linux-x64`, `linux-arm64`,
+            `windows-x64`, or `windows-arm64`.
+
+            ## Build
+
+            ```@HOST_SHELL@
+            @HOST_BOOTSTRAP_COMMAND@
+            cmake --preset @HOST_DEBUG_PRESET@
+            cmake --build --preset @HOST_DEBUG_PRESET@
+            ctest --test-dir build/@HOST_DEBUG_PRESET@ --output-on-failure
             ```
-
-            Use `linux-debug` on Linux. On Windows, run `pwsh scripts/bootstrap_vcpkg.ps1`
-            and then configure with the `windows-debug` preset from a Visual Studio developer shell.
 
             ## Quality
 
-            ```bash
-            bash scripts/format.sh --check
-            cmake --preset macos-tidy
-            cmake --build --preset macos-tidy
-            cmake --build --preset macos-debug --target docs
+            ```@HOST_SHELL@
+            @HOST_FORMAT_COMMAND@
+            cmake --preset @HOST_TIDY_PRESET@
+            cmake --build --preset @HOST_TIDY_PRESET@
+            cmake --build --preset @HOST_DEBUG_PRESET@ --target docs
             ```
             """,
             **values,
@@ -595,11 +864,12 @@ def main() -> int:
         write_file(root, relative, content, executable=relative in executable_files, force=args.force)
 
     print(f"Created modern C++ project at {root}")
+    print(f"Host profile: {host_platform}")
     print("Next steps:")
-    print("  bash scripts/bootstrap_vcpkg.sh")
-    print("  cmake --preset macos-debug")
-    print("  cmake --build --preset macos-debug")
-    print("  ctest --test-dir build/macos-debug --output-on-failure")
+    print(f"  {host_profile['bootstrap']}")
+    print(f"  cmake --preset {host_profile['debug_preset']}")
+    print(f"  cmake --build --preset {host_profile['debug_preset']}")
+    print(f"  ctest --test-dir build/{host_profile['debug_preset']} --output-on-failure")
     return 0
 
 
