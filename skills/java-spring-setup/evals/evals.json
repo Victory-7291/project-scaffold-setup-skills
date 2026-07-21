@@ -1,0 +1,48 @@
+{
+  "skill_name": "java-spring-setup",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a new Java Spring Boot service named 'orders-service' in /tmp/spring_eval_orders_service. Use Maven, Java 21, Spring Boot 4.x, Web MVC REST, typed app configuration, validation, Actuator health/info, production structured logging, and MockMvc tests. I do not need a database or Docker yet.",
+      "expected_output": "A greenfield Spring Boot service with pom.xml, root package app class, application profile files, typed @ConfigurationProperties, a small validated REST controller, ProblemDetail validation errors, Actuator health/info, and tests that do not require Docker or a database.",
+      "files": [],
+      "expectations": [
+        "The project uses Maven with Spring Boot 4.x and Java 21 defaults",
+        "The web dependency uses spring-boot-starter-webmvc rather than the deprecated spring-boot-starter-web path",
+        "The main application class is in a root package above generated API/config/service packages",
+        "application.yml exposes only health and info actuator endpoints by default",
+        "Typed app configuration is implemented with @ConfigurationProperties and validation",
+        "A REST endpoint demonstrates request validation and ProblemDetail error handling",
+        "Tests include a context-load test and a MockMvc API test that require no external services"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Scaffold a Spring Boot API called 'billing-ledger' in /tmp/spring_eval_billing_ledger with PostgreSQL support. I want Flyway migrations, Docker Compose for local Postgres, Testcontainers integration tests, Actuator probes, and Prometheus metrics. Keep it Maven-based.",
+      "expected_output": "A Maven Spring Boot service with PostgreSQL datasource config, Flyway migration folder, Compose including app and postgres, Testcontainers using Spring Boot service connections, Prometheus dependency/exposure, and clear README validation commands.",
+      "files": [],
+      "expectations": [
+        "The scaffold includes PostgreSQL and Flyway dependencies and a db/migration V1 migration",
+        "JPA schema generation is validate-only instead of create/drop in production configuration",
+        "Docker Compose includes a postgres service and passes datasource environment variables to the app",
+        "Tests use Testcontainers with Spring Boot @ServiceConnection for PostgreSQL",
+        "Prometheus metrics are exposed only because the prompt requested them",
+        "README states Docker is required for database integration tests"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Modernize the existing Spring Boot repo in /tmp/spring_eval_legacy_catalog. It is currently a Boot 3.2 Maven app with a controller returning GET /health as {\"status\":\"ok\"} and GET /items as [{\"id\":1,\"name\":\"Widget\"},{\"id\":2,\"name\":\"Gadget\"}]. Keep those exact paths and response payloads, add typed configuration, Actuator health, validation/error handling for future endpoints, tests, and a cleaner package layout. Do not invent authentication.",
+      "expected_output": "The existing Spring Boot app is reorganized conservatively without changing /health or /items contracts; it gains typed configuration, Actuator, validation/error handling, tests for the preserved endpoints, and no fake security system.",
+      "files": [],
+      "expectations": [
+        "Existing /health and /items paths and payloads are preserved exactly",
+        "Regression tests assert the Widget/Gadget payload and original health payload",
+        "The project keeps Maven and does not force an unrelated build-tool switch",
+        "Typed configuration and Actuator are added without exposing sensitive endpoints",
+        "Validation/error handling is added for future endpoints without changing existing success responses",
+        "No authentication scaffold is invented because the prompt did not define an auth model"
+      ]
+    }
+  ]
+}
