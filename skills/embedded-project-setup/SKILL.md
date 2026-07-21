@@ -1,6 +1,6 @@
 ---
 name: embedded-project-setup
-description: Create, modify or improve modern STM32/Cortex-M embedded C firmware projects with platform-aware host toolchains for macOS/Linux/Windows on arm64 or x64: VS Code, clangd, clang-format, clang-tidy, CMakePresets.json, Ninja, arm-none-eabi-gcc/gdb, firmware ELF/BIN/HEX/MAP outputs, OpenOCD, ST-Link or J-Link, Cortex-Debug, Docker/GitHub Actions, and layered CMSIS/HAL/LL/bare-metal structure. Use when users is asked to bootstrap new MCU firmware, inspect and modernize an existing firmware repo, create cross CMake toolchains, VS Code Cortex-Debug configs, flashing/debug scripts, linker/startup files, BSP smoke code, or embedded CI. Prefer cpp-project-setup for host-side C++ app/library projects.
+description: Create, modify or improve modern STM32/Cortex-M embedded C firmware projects with platform-aware host toolchains for macOS/Linux/Windows on arm64 or x64, VS Code, clangd, clang-format, clang-tidy, CMakePresets.json, Ninja, arm-none-eabi-gcc/gdb, firmware ELF/BIN/HEX/MAP outputs, OpenOCD, ST-Link or J-Link, Cortex-Debug, Docker/GitHub Actions, and layered CMSIS/HAL/LL/bare-metal structure. Use when users is asked to bootstrap new MCU firmware, inspect and modernize an existing firmware repo, create cross CMake toolchains, VS Code Cortex-Debug configs, flashing/debug scripts, linker/startup files, BSP smoke code, or embedded CI. Prefer cpp-project-setup for host-side C++ app/library projects.
 ---
 
 # Modern Embedded Project Setup
