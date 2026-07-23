@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "stm32: build",
+      "label": "@TASK_PREFIX@: build",
       "type": "shell",
       "command": "bash",
       "args": [
@@ -24,7 +24,7 @@
       ]
     },
     {
-      "label": "stm32: analyze",
+      "label": "@TASK_PREFIX@: analyze",
       "type": "shell",
       "command": "bash",
       "args": [
@@ -42,7 +42,7 @@
       ]
     },
     {
-      "label": "stm32: flash",
+      "label": "@TASK_PREFIX@: flash",
       "type": "shell",
       "command": "bash",
       "args": [
@@ -60,7 +60,7 @@
       ]
     },
     {
-      "label": "stm32: openocd",
+      "label": "@TASK_PREFIX@: openocd",
       "type": "shell",
       "command": "bash",
       "args": [

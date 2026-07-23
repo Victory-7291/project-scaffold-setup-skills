@@ -2,7 +2,7 @@
 
 ## Toolchain
 
-Use this local development chain for STM32/Cortex-M firmware:
+Use this local development chain for Arm Cortex-M firmware:
 
 ```text
 VS Code
@@ -14,7 +14,7 @@ VS Code
   -> arm-none-eabi-gcc
   -> firmware.elf / firmware.bin / firmware.hex
   -> OpenOCD + ST-Link or J-Link
-  -> STM32 MCU
+  -> Cortex-M MCU
 ```
 
 Use this CI chain when GitHub Actions or another CI system is part of the task:
@@ -43,8 +43,8 @@ For existing firmware, write down the current pipeline before editing:
 
 - Build system: CMake, Make, vendor IDE, CubeMX output, custom scripts, or mixed.
 - Toolchain: `arm-none-eabi-gcc`, vendor compiler, clang-based flow, compiler version, CPU/FPU/float ABI flags.
-- Firmware target: MCU, board, memory sizes, linker script, startup file, vector table, bootloader assumptions.
-- Dependency model: CMSIS, HAL, LL, bare-metal, submodules, vendored Cube trees, package managers.
+- Firmware target: vendor/family, MCU, board, memory origins and sizes, linker script, startup file, vector table, bootloader assumptions.
+- Dependency model: CMSIS, vendor HAL/LL or SDK drivers, bare-metal, submodules, generated vendor trees, package managers.
 - Developer entry points: presets, scripts, VS Code tasks, flash/debug commands, OpenOCD/J-Link configs.
 - Quality gates: format, lint/static analysis, host tests, firmware artifacts, CI and release upload.
 
@@ -111,6 +111,22 @@ firmware/
   README.md
 ```
 
+## Target Model
+
+Separate the reusable Cortex-M toolchain from target-family details:
+
+| Field | Why it matters | Examples |
+| --- | --- | --- |
+| Target family | Names presets, docs, and generated comments without locking the scaffold to one vendor. | `generic-cortex-m`, `stm32g0`, `nrf52`, `rp2040`, `samd21`, `lpc17xx` |
+| MCU | Names the actual silicon target for docs, debug config, and device defines. | `stm32g030c8t6`, `nrf52840`, `rp2040`, `atsamd21g18a` |
+| Board | Captures probe wiring, LEDs, clocks, power, and external memory assumptions. | `nucleo-f446re`, `custom-nrf52840-board` |
+| CPU/FPU/float ABI | Controls GCC/clangd flags and ABI compatibility. | `cortex-m0plus`, `cortex-m4` + `fpv4-sp-d16` + `hard` |
+| Memory map | Controls linker script origins and sizes. | flash at `0x08000000` for many STM32 parts, `0x00000000` for many vendor maps, `0x10000000` for RP2040 XIP |
+| OpenOCD probe/target | Controls flash/debug access and cannot be guessed reliably across vendors. | `interface/stlink.cfg`, `interface/jlink.cfg`, `target/stm32f4x.cfg`, `target/nrf52.cfg`, `target/rp2040.cfg` |
+| BSP template | Determines whether generated smoke code touches real hardware. | `portable` for build-only smoke, target-specific templates only when known-correct |
+
+For an unknown target, generate the portable BSP so the project can compile without board-specific register writes. Treat LED blink, clock setup, pinmux, external memory, and vendor HAL integration as target-specific follow-up work.
+
 ## Reusable Templates
 
 Keep stable generated configuration in `assets/` and render it through the scaffold script:
@@ -126,7 +142,7 @@ Keep stable generated configuration in `assets/` and render it through the scaff
 - `Dockerfile`
 - `.dockerignore`
 
-Use `@PLACEHOLDER@` values for firmware target names, MCU, CPU flags, device defines, OpenOCD interface/target files, clang target, and selected clangd preset. Do not copy product secrets, absolute workstation paths, vendor tree assumptions, or a board-specific HAL source list into the generic templates.
+Use `@PLACEHOLDER@` values for firmware target names, target family, board, MCU, CPU flags, device defines, memory origins/sizes, OpenOCD interface/target files, clang target, CMake preset names, and selected clangd preset. Do not copy product secrets, absolute workstation paths, vendor tree assumptions, or a board-specific HAL source list into the generic templates.
 
 ## Layering
 
@@ -135,15 +151,15 @@ Keep the software stack explicit:
 ```text
 Application
   -> board support / drivers / middleware
-  -> HAL API, LL API, or direct registers
+  -> vendor HAL/LL/SDK API or direct registers
   -> CMSIS Device
   -> Cortex-M processor
-  -> STM32 peripheral hardware
+  -> MCU peripheral hardware
 ```
 
 - Use CMSIS for CPU/device definitions when available.
-- Use HAL when portability, official examples, and team velocity matter.
-- Use LL when peripheral paths need less abstraction but still benefit from vendor definitions.
+- Use vendor HALs or SDK drivers when portability, official examples, and team velocity matter.
+- Use lower-level vendor APIs when peripheral paths need less abstraction but still benefit from vendor definitions.
 - Use bare-metal registers for startup, board smoke tests, bootloaders, or tightly constrained paths.
 - Do not treat `clangd` as the compiler; it consumes `compile_commands.json` produced by CMake.
 
@@ -151,9 +167,9 @@ Application
 
 - Use `CMAKE_SYSTEM_NAME Generic` and `CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY` in the toolchain file.
 - Set `CMAKE_EXPORT_COMPILE_COMMANDS` to `ON`.
-- Keep CPU, FPU, float ABI, MCU define, linker script, and OpenOCD target visible in generated files.
+- Keep CPU, FPU, float ABI, MCU define, linker script, memory origins/sizes, and OpenOCD target visible in generated files.
 - Produce `.elf`, `.bin`, `.hex`, `.map`, and `arm-none-eabi-size` output after build.
-- Keep `stm32-debug`, `stm32-release`, and `stm32-analyze` presets.
+- Keep target-neutral preset names by default: `firmware-debug`, `firmware-release`, and `firmware-analyze`. Allow a custom prefix for teams that want `nrf52-debug`, `rp2040-debug`, or a product-specific prefix.
 - Enable clang-tidy only in the analyze preset or behind an option.
 - Pass `--target=arm-none-eabi` into clangd and clang-tidy when using cross GCC flags, otherwise host LLVM tools may reject Cortex-M CPU options.
 - Suppress default clang-tidy checks that are noisy for linker symbols and memory-mapped registers; keep project logic checks enabled.
@@ -165,7 +181,7 @@ Application
 - Use Cortex-Debug in VS Code for interactive debug.
 - Keep shell and PowerShell scripts for build, format, analyze, flash, and OpenOCD server startup when generating a cross-platform scaffold.
 - Run flash/debug commands only when hardware is attached and the user expects hardware access.
-- If flashing fails, check power, SWD wiring, OpenOCD target file, probe interface file, and SWD speed.
+- If flashing fails, check power, SWD wiring, OpenOCD target file, probe interface file, target voltage, reset strategy, flash origin, and SWD speed.
 
 ## CI Decisions
 
@@ -178,6 +194,6 @@ Application
 ## Existing Firmware Rules
 
 - Do not mix app and firmware build systems without a clear boundary.
-- Do not move vendor HAL/CMSIS trees unless all include paths, linker/startup references, docs, and CI are updated.
+- Do not move vendor HAL/CMSIS/SDK trees unless all include paths, linker/startup references, docs, and CI are updated.
 - Preserve chip-specific linker scripts and startup files unless the target MCU changes.
 - Treat CubeMX-generated files as user/vendor-owned unless the repo already marks editable sections.

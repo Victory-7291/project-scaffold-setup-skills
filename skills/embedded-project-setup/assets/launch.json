@@ -2,19 +2,19 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug @TARGET@ (@MCU@)",
+      "name": "Debug @TARGET@ (@MCU@ on @BOARD@)",
       "type": "cortex-debug",
       "request": "launch",
       "servertype": "openocd",
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceFolder}/build/stm32-debug/@TARGET@.elf",
-      "device": "@MCU_UPPER@",
+      "executable": "${workspaceFolder}/build/@DEBUG_PRESET@/@TARGET@.elf",
+      "device": "@DEBUG_DEVICE@",
       "runToEntryPoint": "main",
       "configFiles": [
         "interface/@OPENOCD_INTERFACE@.cfg",
         "target/@OPENOCD_TARGET@.cfg"
       ],
-      "preLaunchTask": "stm32: build"
+      "preLaunchTask": "@TASK_PREFIX@: build"
     }
   ]
 }

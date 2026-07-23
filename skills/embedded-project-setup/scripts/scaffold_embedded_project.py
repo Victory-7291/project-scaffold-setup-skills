@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Scaffold a modern STM32/Cortex-M embedded C project."""
+"""Scaffold a modern Arm Cortex-M embedded C project."""
 
 from __future__ import annotations
 
@@ -127,10 +127,27 @@ def safe_name(value: str) -> str:
     return name
 
 
+def safe_slug(value: str, *, default: str) -> str:
+    slug = re.sub(r"[^A-Za-z0-9]+", "-", value.strip()).strip("-").lower()
+    return slug or default
+
+
 def cmake_project_name(value: str) -> str:
     parts = re.split(r"[^A-Za-z0-9]+", value.strip())
     joined = "".join(part[:1].upper() + part[1:] for part in parts if part)
     return joined or "Firmware"
+
+
+def display_label(value: str) -> str:
+    words = re.split(r"[^A-Za-z0-9]+", value.strip())
+    return " ".join(word.upper() if word.isupper() else word[:1].upper() + word[1:] for word in words if word)
+
+
+def linker_origin(value: str, *, arg_name: str) -> str:
+    normalized = value.strip()
+    if not re.fullmatch(r"(0x[0-9A-Fa-f]+|[0-9]+)", normalized):
+        raise ValueError(f"{arg_name} must be a decimal or hex address, for example 0x08000000")
+    return normalized
 
 
 def render(template: str, **values: str) -> str:
@@ -159,8 +176,71 @@ def cmake_list(items: list[str], indent: str = "  ") -> str:
     return "\n".join(f"{indent}{item}" for item in items)
 
 
+def board_source(template: str) -> str:
+    if template == "stm32g0-pa5":
+        return """
+        #include "bsp/board.h"
+
+        #define REG32(address) (*(volatile unsigned int *)(address))
+
+        #define RCC_IOPENR REG32(0x40021034u)
+        #define RCC_IOPENR_GPIOAEN (1u << 0u)
+
+        #define GPIOA_BASE (0x50000000u)
+        #define GPIOA_MODER REG32(GPIOA_BASE + 0x00u)
+        #define GPIOA_BSRR REG32(GPIOA_BASE + 0x18u)
+
+        #define LED_PIN (5u)
+        #define MODER_BITS_PER_PIN (2u)
+        #define GPIO_MODER_MASK (0x3u)
+        #define GPIO_MODER_OUTPUT (0x1u)
+
+        void board_init(void) {
+          RCC_IOPENR |= RCC_IOPENR_GPIOAEN;
+
+          const unsigned int shift = LED_PIN * MODER_BITS_PER_PIN;
+          unsigned int moder = GPIOA_MODER;
+          moder &= (unsigned int)~(GPIO_MODER_MASK << shift);
+          moder |= (GPIO_MODER_OUTPUT << shift);
+          GPIOA_MODER = moder;
+        }
+
+        void board_led_set(unsigned int enabled) {
+          if (enabled) {
+            GPIOA_BSRR = (1u << LED_PIN);
+          } else {
+            GPIOA_BSRR = (1u << (LED_PIN + 16u));
+          }
+        }
+
+        void board_delay(unsigned int cycles) {
+          volatile unsigned int remaining = cycles;
+          while (remaining > 0u) {
+            __asm volatile("nop");
+            --remaining;
+          }
+        }
+        """
+
+    return """
+    #include "bsp/board.h"
+
+    void board_init(void) {}
+
+    void board_led_set(unsigned int enabled) { (void)enabled; }
+
+    void board_delay(unsigned int cycles) {
+      volatile unsigned int remaining = cycles;
+      while (remaining > 0u) {
+        __asm volatile("nop");
+        --remaining;
+      }
+    }
+    """
+
+
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Create a modern STM32 embedded C project scaffold.")
+    parser = argparse.ArgumentParser(description="Create a modern Arm Cortex-M embedded C project scaffold.")
     parser.add_argument("--name", required=True, help="Firmware target name, for example smart_lock_fw")
     parser.add_argument("--out", help="Output directory. Defaults to ./<sanitized-name>.")
     parser.add_argument(
@@ -169,17 +249,29 @@ def main() -> int:
         choices=["auto", *HOST_PROFILES.keys()],
         help="Developer host profile used for README commands and script recommendations",
     )
-    parser.add_argument("--mcu", default="stm32g030c8t6", help="MCU name used in docs and VS Code")
-    parser.add_argument("--device-define", default="STM32G030xx", help="Preprocessor define for vendor headers")
+    parser.add_argument("--target-family", default="generic-cortex-m", help="Target family label, for example stm32g0, nrf52, rp2040, samd21, or lpc17xx")
+    parser.add_argument("--board", default="custom-board", help="Board name used in docs and VS Code debug labels")
+    parser.add_argument("--mcu", default="generic-cortex-m0plus", help="MCU name used in docs and VS Code")
+    parser.add_argument("--device-define", default="TARGET_GENERIC_CORTEX_M", help="Preprocessor define for vendor headers")
     parser.add_argument("--cpu", default="cortex-m0plus", help="GCC -mcpu value")
     parser.add_argument("--clang-target", default="arm-none-eabi", help="Target triple passed to clangd/clang-tidy")
     parser.add_argument("--fpu", default="", help="Optional GCC -mfpu value, for example fpv4-sp-d16")
     parser.add_argument("--float-abi", default="", help="Optional GCC -mfloat-abi value, for example hard")
-    parser.add_argument("--flash-kb", type=int, default=64, help="Flash size for generated linker script")
-    parser.add_argument("--ram-kb", type=int, default=8, help="RAM size for generated linker script")
+    parser.add_argument("--flash-origin", default="0x08000000", help="Flash origin for generated linker script")
+    parser.add_argument("--flash-kb", type=int, default=256, help="Flash size for generated linker script")
+    parser.add_argument("--ram-origin", default="0x20000000", help="RAM origin for generated linker script")
+    parser.add_argument("--ram-kb", type=int, default=64, help="RAM size for generated linker script")
     parser.add_argument("--openocd-interface", default="stlink", help="OpenOCD interface cfg stem")
-    parser.add_argument("--openocd-target", default="stm32g0x", help="OpenOCD target cfg stem")
-    parser.add_argument("--clangd-preset", default="stm32-debug", help="Preset whose build dir clangd should read")
+    parser.add_argument("--openocd-target", default="replace-with-openocd-target", help="OpenOCD target cfg stem")
+    parser.add_argument("--preset-prefix", default="firmware", help="Prefix for CMake presets and VS Code task labels")
+    parser.add_argument("--clangd-preset", default="", help="Preset whose build dir clangd should read. Defaults to <preset-prefix>-debug.")
+    parser.add_argument("--debug-device", default="", help="Cortex-Debug device string. Defaults to uppercase --mcu.")
+    parser.add_argument(
+        "--bsp-template",
+        default="portable",
+        choices=["portable", "stm32g0-pa5"],
+        help="Board support smoke template. Use portable for generic targets.",
+    )
     parser.add_argument("--force", action="store_true", help="Overwrite scaffold-owned files if they already exist")
     args = parser.parse_args()
 
@@ -188,6 +280,27 @@ def main() -> int:
 
     target = safe_name(args.name)
     cmake_name = cmake_project_name(args.name)
+    preset_prefix = safe_slug(args.preset_prefix, default="firmware")
+    debug_preset = f"{preset_prefix}-debug"
+    release_preset = f"{preset_prefix}-release"
+    analyze_preset = f"{preset_prefix}-analyze"
+    clangd_preset = args.clangd_preset or debug_preset
+    task_prefix = preset_prefix
+    target_family = safe_slug(args.target_family, default="generic-cortex-m")
+    target_family_display = display_label(target_family) or "Generic Cortex M"
+    flash_origin = linker_origin(args.flash_origin, arg_name="--flash-origin")
+    ram_origin = linker_origin(args.ram_origin, arg_name="--ram-origin")
+    debug_device = args.debug_device or args.mcu.upper()
+    bsp_note = (
+        "The generated BSP uses STM32G0 GPIOA PA5 as a hardware smoke test."
+        if args.bsp_template == "stm32g0-pa5"
+        else "The generated BSP is portable build-smoke code and does not touch board registers."
+    )
+    openocd_note = (
+        "OpenOCD target is a placeholder; set the correct `--openocd-target` before flashing."
+        if args.openocd_target == "replace-with-openocd-target"
+        else "OpenOCD probe and target config were rendered from the scaffold arguments."
+    )
     root = Path(args.out) if args.out else Path.cwd() / target
     root = root.expanduser().resolve()
     root.mkdir(parents=True, exist_ok=True)
@@ -201,17 +314,31 @@ def main() -> int:
     values = {
         "TARGET": target,
         "CMAKE_PROJECT": cmake_name,
+        "TARGET_FAMILY": target_family,
+        "TARGET_FAMILY_DISPLAY": target_family_display,
+        "BOARD": args.board,
         "MCU": args.mcu,
         "MCU_UPPER": args.mcu.upper(),
         "DEVICE_DEFINE": args.device_define,
         "CPU": args.cpu,
         "CLANG_TARGET": args.clang_target,
         "CPU_FLAGS": cmake_list(cpu_flags, indent="  "),
+        "FLASH_ORIGIN": flash_origin,
         "FLASH_KB": str(args.flash_kb),
+        "RAM_ORIGIN": ram_origin,
         "RAM_KB": str(args.ram_kb),
         "OPENOCD_INTERFACE": args.openocd_interface,
         "OPENOCD_TARGET": args.openocd_target,
-        "CLANGD_PRESET": args.clangd_preset,
+        "DEBUG_DEVICE": debug_device,
+        "PRESET_PREFIX": preset_prefix,
+        "DEBUG_PRESET": debug_preset,
+        "RELEASE_PRESET": release_preset,
+        "ANALYZE_PRESET": analyze_preset,
+        "TASK_PREFIX": task_prefix,
+        "CLANGD_PRESET": clangd_preset,
+        "BSP_TEMPLATE": args.bsp_template,
+        "BSP_NOTE": bsp_note,
+        "OPENOCD_NOTE": openocd_note,
         "UPPER": target.upper(),
         "HOST_PLATFORM": host_platform,
         "HOST_SETUP": host_profile["setup"].strip(),
@@ -344,34 +471,34 @@ def main() -> int:
                   }
                 },
                 {
-                  "name": "stm32-debug",
+                  "name": "@DEBUG_PRESET@",
                   "inherits": "base",
-                  "displayName": "STM32 Debug",
+                  "displayName": "@TARGET_FAMILY_DISPLAY@ Debug",
                   "cacheVariables": {
                     "CMAKE_BUILD_TYPE": "Debug"
                   }
                 },
                 {
-                  "name": "stm32-release",
+                  "name": "@RELEASE_PRESET@",
                   "inherits": "base",
-                  "displayName": "STM32 Release",
+                  "displayName": "@TARGET_FAMILY_DISPLAY@ Release",
                   "cacheVariables": {
                     "CMAKE_BUILD_TYPE": "Release"
                   }
                 },
                 {
-                  "name": "stm32-analyze",
-                  "inherits": "stm32-debug",
-                  "displayName": "STM32 clang-tidy",
+                  "name": "@ANALYZE_PRESET@",
+                  "inherits": "@DEBUG_PRESET@",
+                  "displayName": "@TARGET_FAMILY_DISPLAY@ clang-tidy",
                   "cacheVariables": {
                     "@UPPER@_ENABLE_CLANG_TIDY": "ON"
                   }
                 }
               ],
               "buildPresets": [
-                { "name": "stm32-debug", "configurePreset": "stm32-debug" },
-                { "name": "stm32-release", "configurePreset": "stm32-release" },
-                { "name": "stm32-analyze", "configurePreset": "stm32-analyze" }
+                { "name": "@DEBUG_PRESET@", "configurePreset": "@DEBUG_PRESET@" },
+                { "name": "@RELEASE_PRESET@", "configurePreset": "@RELEASE_PRESET@" },
+                { "name": "@ANALYZE_PRESET@", "configurePreset": "@ANALYZE_PRESET@" }
               ]
             }
             """,
@@ -441,50 +568,17 @@ def main() -> int:
             """,
             **values,
         ),
-        "src/bsp/board.c": render(
+        "src/drivers/README.md": render(
             """
-            #include "bsp/board.h"
+            # Drivers
 
-            #define REG32(address) (*(volatile unsigned int *)(address))
-
-            #define RCC_IOPENR REG32(0x40021034u)
-            #define RCC_IOPENR_GPIOAEN (1u << 0u)
-
-            #define GPIOA_BASE (0x50000000u)
-            #define GPIOA_MODER REG32(GPIOA_BASE + 0x00u)
-            #define GPIOA_BSRR REG32(GPIOA_BASE + 0x18u)
-
-            #define LED_PIN (5u)
-            #define MODER_BITS_PER_PIN (2u)
-            #define GPIO_MODER_MASK (0x3u)
-            #define GPIO_MODER_OUTPUT (0x1u)
-
-            void board_init(void) {
-              RCC_IOPENR |= RCC_IOPENR_GPIOAEN;
-
-              const unsigned int shift = LED_PIN * MODER_BITS_PER_PIN;
-              unsigned int moder = GPIOA_MODER;
-              moder &= (unsigned int)~(GPIO_MODER_MASK << shift);
-              moder |= (GPIO_MODER_OUTPUT << shift);
-              GPIOA_MODER = moder;
-            }
-
-            void board_led_set(unsigned int enabled) {
-              if (enabled) {
-                GPIOA_BSRR = (1u << LED_PIN);
-              } else {
-                GPIOA_BSRR = (1u << (LED_PIN + 16u));
-              }
-            }
-
-            void board_delay(unsigned int cycles) {
-              volatile unsigned int remaining = cycles;
-              while (remaining > 0u) {
-                __asm volatile("nop");
-                --remaining;
-              }
-            }
+            Place reusable target-family or board drivers here. Keep application logic in
+            `src/app/` and board wiring in `src/bsp/`.
             """,
+            **values,
+        ),
+        "src/bsp/board.c": render(
+            board_source(args.bsp_template),
             **values,
         ),
         "startup/startup.c": render(
@@ -563,8 +657,8 @@ def main() -> int:
 
             MEMORY
             {
-              FLASH (rx)  : ORIGIN = 0x08000000, LENGTH = @FLASH_KB@K
-              RAM   (xrw) : ORIGIN = 0x20000000, LENGTH = @RAM_KB@K
+              FLASH (rx)  : ORIGIN = @FLASH_ORIGIN@, LENGTH = @FLASH_KB@K
+              RAM   (xrw) : ORIGIN = @RAM_ORIGIN@, LENGTH = @RAM_KB@K
             }
 
             _estack = ORIGIN(RAM) + LENGTH(RAM);
@@ -641,6 +735,8 @@ def main() -> int:
             {
               "cmake.useCMakePresets": "always",
               "cmake.configureOnOpen": true,
+              "cmake.configurePreset": "@DEBUG_PRESET@",
+              "cmake.buildPreset": "@DEBUG_PRESET@",
               "C_Cpp.intelliSenseEngine": "disabled",
               "clangd.arguments": [
                 "--background-index",
@@ -658,13 +754,13 @@ def main() -> int:
               "version": "0.2.0",
               "configurations": [
                 {
-                  "name": "Debug @TARGET@",
+                  "name": "Debug @TARGET@ (@MCU@ on @BOARD@)",
                   "type": "cortex-debug",
                   "request": "launch",
                   "servertype": "openocd",
                   "cwd": "${workspaceFolder}",
-                  "executable": "${workspaceFolder}/build/stm32-debug/@TARGET@.elf",
-                  "device": "@MCU_UPPER@",
+                  "executable": "${workspaceFolder}/build/@DEBUG_PRESET@/@TARGET@.elf",
+                  "device": "@DEBUG_DEVICE@",
                   "runToEntryPoint": "main",
                   "configFiles": [
                     "interface/@OPENOCD_INTERFACE@.cfg",
@@ -792,7 +888,7 @@ def main() -> int:
             set -euo pipefail
 
             ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-            PRESET="${PRESET:-stm32-debug}"
+            PRESET="${PRESET:-@DEBUG_PRESET@}"
 
             cd "${ROOT_DIR}"
             cmake --preset "${PRESET}"
@@ -810,7 +906,7 @@ def main() -> int:
             $ErrorActionPreference = "Stop"
 
             $RootDir = Resolve-Path (Join-Path $PSScriptRoot "..")
-            $Preset = if ($env:PRESET) { $env:PRESET } else { "stm32-debug" }
+            $Preset = if ($env:PRESET) { $env:PRESET } else { "@DEBUG_PRESET@" }
 
             Push-Location $RootDir
             try {
@@ -833,7 +929,7 @@ def main() -> int:
             set -euo pipefail
 
             ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-            PRESET=stm32-analyze "${ROOT_DIR}/scripts/build.sh"
+            PRESET=@ANALYZE_PRESET@ "${ROOT_DIR}/scripts/build.sh"
             """,
             **values,
         ),
@@ -842,7 +938,7 @@ def main() -> int:
             $ErrorActionPreference = "Stop"
 
             $PreviousPreset = $env:PRESET
-            $env:PRESET = "stm32-analyze"
+            $env:PRESET = "@ANALYZE_PRESET@"
             try {
               & (Join-Path $PSScriptRoot "build.ps1")
             } finally {
@@ -857,7 +953,7 @@ def main() -> int:
             set -euo pipefail
 
             ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-            PRESET="${PRESET:-stm32-debug}"
+            PRESET="${PRESET:-@DEBUG_PRESET@}"
             ELF="${ROOT_DIR}/build/${PRESET}/@TARGET@.elf"
 
             "${ROOT_DIR}/scripts/build.sh"
@@ -874,7 +970,7 @@ def main() -> int:
             $ErrorActionPreference = "Stop"
 
             $RootDir = Resolve-Path (Join-Path $PSScriptRoot "..")
-            $Preset = if ($env:PRESET) { $env:PRESET } else { "stm32-debug" }
+            $Preset = if ($env:PRESET) { $env:PRESET } else { "@DEBUG_PRESET@" }
             $Elf = Join-Path $RootDir "build/$Preset/@TARGET@.elf"
 
             & (Join-Path $PSScriptRoot "build.ps1")
@@ -976,10 +1072,10 @@ def main() -> int:
                     with:
                       name: @TARGET@-firmware
                       path: |
-                        build/stm32-debug/@TARGET@.elf
-                        build/stm32-debug/@TARGET@.bin
-                        build/stm32-debug/@TARGET@.hex
-                        build/stm32-debug/@TARGET@.map
+                        build/@DEBUG_PRESET@/@TARGET@.elf
+                        build/@DEBUG_PRESET@/@TARGET@.bin
+                        build/@DEBUG_PRESET@/@TARGET@.hex
+                        build/@DEBUG_PRESET@/@TARGET@.map
             """,
             **values,
         ),
@@ -996,8 +1092,21 @@ def main() -> int:
             """
             # @CMAKE_PROJECT@
 
-            Modern STM32/Cortex-M firmware scaffold for @MCU@ using VS Code, clangd,
-            CMake presets, Ninja, arm-none-eabi-gcc, OpenOCD, and Cortex-Debug.
+            Modern Arm Cortex-M firmware scaffold for @MCU@ on @BOARD@ using VS Code,
+            clangd, CMake presets, Ninja, arm-none-eabi-gcc, OpenOCD, and Cortex-Debug.
+
+            ## Target
+
+            - Target family: `@TARGET_FAMILY@`
+            - MCU: `@MCU@`
+            - Board: `@BOARD@`
+            - CPU: `@CPU@`
+            - Flash: `@FLASH_ORIGIN@` / `@FLASH_KB@ KiB`
+            - RAM: `@RAM_ORIGIN@` / `@RAM_KB@ KiB`
+            - OpenOCD: `interface/@OPENOCD_INTERFACE@.cfg`, `target/@OPENOCD_TARGET@.cfg`
+            - BSP template: `@BSP_TEMPLATE@`
+
+            @OPENOCD_NOTE@
 
             ## Host Toolchain
 
@@ -1034,8 +1143,8 @@ def main() -> int:
             @HOST_OPENOCD_COMMAND@
             ```
 
-            The generated BSP is a minimal @MCU@ smoke example. Replace it with CMSIS,
-            HAL, LL, or board-specific drivers before product firmware work.
+            @BSP_NOTE@ Replace it with CMSIS, vendor HAL/LL/SDK code, or
+            board-specific drivers before product firmware work.
             """,
             **values,
         ),
@@ -1069,6 +1178,9 @@ def main() -> int:
 
     print(f"Created embedded firmware project at {root}")
     print(f"Host profile: {host_platform}")
+    print(f"Target family: {target_family}")
+    if args.openocd_target == "replace-with-openocd-target":
+        print("OpenOCD target is a placeholder; set --openocd-target before flashing hardware.")
     print("Next steps:")
     print(f"  {host_profile['build']}")
     print(f"  {host_profile['flash']}   # when hardware is attached")

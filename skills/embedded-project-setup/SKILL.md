@@ -1,19 +1,19 @@
 ---
 name: embedded-project-setup
-description: Create, modify or improve modern STM32/Cortex-M embedded C firmware projects with platform-aware host toolchains for macOS/Linux/Windows on arm64 or x64, VS Code, clangd, clang-format, clang-tidy, CMakePresets.json, Ninja, arm-none-eabi-gcc/gdb, firmware ELF/BIN/HEX/MAP outputs, OpenOCD, ST-Link or J-Link, Cortex-Debug, Docker/GitHub Actions, and layered CMSIS/HAL/LL/bare-metal structure. Use when users is asked to bootstrap new MCU firmware, inspect and modernize an existing firmware repo, create cross CMake toolchains, VS Code Cortex-Debug configs, flashing/debug scripts, linker/startup files, BSP smoke code, or embedded CI. Prefer cpp-project-setup for host-side C++ app/library projects.
+description: Create, modify or improve modern embedded firmware projects for STM32, ESP32, AVR, RP2040, Nordic nRF, Zephyr/RTOS, and other MCU targets while sharing a consistent VS Code, clangd, clang-format, clang-tidy, CMakePresets.json, Ninja, firmware artifact, Docker, and GitHub Actions development workflow where the target ecosystem supports it. Use when users ask to bootstrap MCU firmware, inspect or modernize an existing bare-metal, vendor SDK, Arduino-style, ESP-IDF, Pico SDK, Zephyr, FreeRTOS, CMSIS/HAL/LL, or RTOS firmware repo, create cross CMake toolchains, editor configs, flashing/debug scripts, linker/startup files, portable BSP smoke code, or embedded CI. Prefer cpp-project-setup for host-side C++ app/library projects.
 ---
 
 # Modern Embedded Project Setup
 
 ## Overview
 
-Create or modernize embedded C firmware around this pipeline:
+Create or modernize embedded firmware around a shared engineering pipeline, then adapt the target-specific compiler, SDK, flashing, and debug pieces to the selected MCU:
 
 ```text
-VS Code -> clangd -> clang-format -> clang-tidy -> CMake -> Ninja -> GCC -> ELF/BIN -> OpenOCD -> MCU
+VS Code -> clangd -> clang-format -> clang-tidy -> CMake/CMakePresets -> Ninja -> target compiler/SDK -> firmware artifacts -> flash/debug -> MCU
 ```
 
-Treat editor analysis, static checks, build generation, cross compilation, flashing, and debug as separate stages. First classify the user's working directory and host platform, then either generate a greenfield scaffold or modernize the existing firmware pipeline.
+Treat editor analysis, static checks, build generation, cross compilation, artifact generation, flashing, and debug as separate stages. First classify the user's working directory and host platform, then either generate a greenfield scaffold or modernize the existing firmware pipeline.
 
 ## Workflow
 
@@ -28,68 +28,116 @@ Treat editor analysis, static checks, build generation, cross compilation, flash
    - If the agent is running somewhere other than the user's real development machine, ask for the user's OS/architecture instead of assuming the sandbox matches their workstation.
 
 3. Identify the firmware target before writing files.
-   - Capture MCU, board, debug probe, flash/RAM size, CPU core, FPU/float ABI, OpenOCD target file, and whether the project will use CMSIS, HAL, LL, bare-metal register access, or a mix.
-   - If unspecified, default to a minimal STM32G030C8T6 smoke project: Cortex-M0+, 64 KiB flash, 8 KiB RAM, ST-Link, OpenOCD target `stm32g0x`.
+   - Capture target ecosystem first: STM32/Cortex-M, ESP32/ESP-IDF, AVR/Arduino or bare-metal avr-gcc, RP2040/Pico SDK, Nordic nRF/nRF Connect SDK or Zephyr, Zephyr/RTOS board target, or another MCU family.
+   - Capture the concrete MCU or board, SDK/framework, debug probe, flash/RAM map when relevant, CPU core, FPU/float ABI when relevant, flash tool, debug server, and whether the project will use vendor HAL/SDK, RTOS APIs, CMSIS, bare-metal register access, or a mix.
+   - If the user has not provided the target, ask for the MCU/board and preferred framework before writing files. Do not silently default to any STM32, ESP32, AVR, RP2040, Nordic, or Zephyr board.
+   - If the user explicitly wants a target-agnostic starter before hardware is known, generate only a portable build-smoke scaffold with no hardware register writes, no final flash command assumptions, and clear TODOs for target selection.
 
-4. Generate or update the project.
+4. Choose the target profile.
+   - Use this matrix to choose the actual compiler, build driver, artifact tools, flash command, debug server, Docker image, and CI commands before generating files:
+
+| Target/platform | Compiler and build tools to configure | Firmware artifacts | Flash/debug tools to configure |
+| --- | --- | --- | --- |
+| STM32 MCU | `arm-none-eabi-gcc/g++`, `arm-none-eabi-objcopy`, `arm-none-eabi-size`, `arm-none-eabi-gdb`, CMake, Ninja, CMSIS plus STM32 HAL/LL or bare-metal sources. Use GNU Tools for STM32 or ST Arm Clang instead when the project requests ST's toolchain. | `.elf`, `.bin`, `.hex`, `.map` | OpenOCD or STM32CubeProgrammer/ST-LINK GDB server, ST-Link or J-Link, Cortex-Debug or STM32 VS Code debug configuration. |
+| ESP32 family | ESP-IDF, CMake, Ninja, `idf.py`; configure `xtensa-esp-elf-gcc/g++` for Xtensa ESP32 variants and `riscv32-esp-elf-gcc/g++` for RISC-V ESP32 variants through ESP-IDF tooling. | ESP-IDF app/bootloader/partition `.bin` images, `.elf`, `.map` | `idf.py flash`, `esptool.py`, `idf.py monitor`, Espressif OpenOCD/JTAG and ESP-IDF debug configuration when hardware debug is requested. |
+| AVR | AVR GNU Toolchain: `avr-gcc/g++`, `avr-objcopy`, `avr-size`, `avr-objdump`, AVR Libc, CMake or Make. Configure `-mmcu=<device>` from the exact AVR MCU. | `.elf`, `.hex`, `.eep`, `.map` when configured | `avrdude` with the user's programmer and port, or the existing Arduino/Microchip upload flow. |
+| RP2040/RP2350 | Pico SDK, CMake, Ninja or Make, `arm-none-eabi-gcc/g++`, Pico SDK tools such as `elf2uf2`; configure `PICO_SDK_PATH` and board settings. | `.elf`, `.uf2`, `.bin`, `.hex`, `.map` | USB bootloader drag-and-drop, `picotool`, Picoprobe/OpenOCD, `arm-none-eabi-gdb`, Cortex-Debug when debugging is requested. |
+| Nordic nRF | Prefer nRF Connect SDK / Zephyr SDK with `west`, CMake, Ninja, and the SDK-managed Arm toolchain. For direct bare-metal nRF projects, configure `arm-none-eabi-gcc/g++`, CMSIS/nrfx, CMake, and Ninja. | Zephyr/nRF merged `.hex` and `.elf`, or direct bare-metal `.elf`, `.bin`, `.hex`, `.map` | `west flash`, `nrfjprog`, J-Link tools, OpenOCD where supported, `west debug`, or Cortex-Debug/J-Link configuration. |
+| Zephyr/RTOS | Zephyr SDK or the vendor RTOS toolchain selected by board architecture; configure `west`, CMake, Ninja, devicetree, Kconfig, and board overlays. Use architecture-specific toolchains such as `arm-zephyr-eabi`, RISC-V, Xtensa, x86, ARC, or vendor-provided compilers as required by the board. | Zephyr `.elf`, `.hex`, `.bin`, merged images, signed images, or RTOS/vendor-specific outputs | `west flash`, `west debug`, board runner config, OpenOCD/J-Link/pyOCD/vendor runners as selected by Zephyr or the RTOS. |
+
+   - The shared workflow is editor/build-system/quality/CI consistency. The compiler and flash/debug tools must come from the selected target profile.
+   - Do not generate a generic `arm-none-eabi-gcc` toolchain file for ESP32, AVR, Zephyr non-Arm boards, or any platform whose SDK owns toolchain selection.
+
+5. Generate or update the project.
    - For greenfield scaffolding, run from this skill directory:
 
 ```bash
 python3 scripts/scaffold_embedded_project.py \
   --name firmware \
   --out /path/to/workspace/firmware \
-  --host-platform macos-arm64
+  --host-platform macos-arm64 \
+  --target-family <target-family> \
+  --board <board-name> \
+  --mcu <mcu-name> \
+  --cpu <cpu-core>
 ```
 
-   - The scaffold script renders reusable standard configuration from `assets/` for CMake, presets, clangd/tidy, VS Code, Docker, and debug tasks. Update assets when the shared firmware standard changes; update the Python script when generation logic, MCU arguments, linker/startup defaults, or command entry points change.
+   - Use the bundled scaffold script only for direct CMake-style Cortex-M projects that fit the `arm-none-eabi-gcc` flow. For ESP-IDF, AVR, Pico SDK, Zephyr, or other ecosystems, either adapt the generated standard configs carefully or create/update the ecosystem-native files directly.
+   - For a concrete Cortex-M target, pass explicit target values:
+
+```bash
+python3 scripts/scaffold_embedded_project.py \
+  --name sensor_fw \
+  --out /path/to/workspace/sensor_fw \
+  --target-family nrf52 \
+  --board custom-nrf52840-board \
+  --mcu nrf52840 \
+  --device-define NRF52840_XXAA \
+  --cpu cortex-m4 \
+  --fpu fpv4-sp-d16 \
+  --float-abi hard \
+  --flash-origin 0x00000000 \
+  --flash-kb 1024 \
+  --ram-origin 0x20000000 \
+  --ram-kb 256 \
+  --openocd-interface jlink \
+  --openocd-target nrf52
+```
+
+   - The scaffold script renders reusable standard configuration from `assets/` for CMake, presets, clangd/tidy, VS Code, Docker, and debug tasks. Update assets when the shared firmware standard changes; update the Python script when generation logic, MCU arguments, linker/startup defaults, BSP templates, or command entry points change.
    - For existing firmware, inspect `CMakeLists.txt`, `CMakePresets.json`, toolchain files, linker scripts, startup files, `.vscode/`, `.clangd`, `.clang-tidy`, flash/debug scripts, Dockerfile, CI workflows, and local docs before editing.
    - Omit `--host-platform` only when generating on the same machine where the project will be developed; the script will auto-detect that host.
 
-5. Preserve the embedded layer model.
+6. Preserve the embedded layer model.
    - Keep application logic above board support and drivers.
-   - Keep CMSIS as the lowest common Cortex-M/device layer when vendor headers are available.
-   - Use HAL for portability and team velocity, LL for tighter peripheral paths, and direct registers only for startup, BSP smoke tests, bootloaders, or performance-critical code.
-   - Do not vendor-copy STM32Cube or HAL trees blindly; prefer a documented submodule, package, or user-provided vendor directory.
+   - Keep the BSP thin and explicit: board wiring belongs there, reusable chip drivers belong below it, application behavior belongs above it.
+   - Use CMSIS as the lowest common Cortex-M/device layer when vendor headers are available.
+   - Use vendor HALs, SDK drivers, ESP-IDF components, Pico SDK libraries, Arduino cores, Zephyr drivers, or RTOS APIs when they match the chosen ecosystem; use lower-level APIs or direct registers only for startup, BSP smoke tests, bootloaders, or performance-critical code.
+   - Do not vendor-copy large SDK trees blindly; prefer a documented submodule, package, generated vendor directory, or user-provided dependency path.
 
-6. Wire the toolchain.
-   - Use CMake presets for `stm32-debug`, `stm32-release`, and `stm32-analyze`.
-   - Use a `cmake/arm-none-eabi-gcc.cmake` toolchain file.
+7. Wire the toolchain.
+   - Use CMake presets named from a target-neutral prefix, by default `firmware-debug`, `firmware-release`, and `firmware-analyze`.
+   - Configure the compiler and build driver from the selected target profile: create a CMake toolchain file for direct bare-metal GCC flows, use ESP-IDF's `idf.py` and managed toolchains for ESP32, use AVR GCC and `-mmcu` settings for AVR, use Pico SDK variables for RP2040/RP2350, and preserve `west`/Zephyr SDK or vendor RTOS toolchain selection for Zephyr/RTOS projects.
+   - Keep generated `CMakePresets.json`, VS Code settings/tasks/launch configs, shell/PowerShell scripts, Dockerfile, and GitHub Actions workflow aligned with that selected compiler and build command.
    - Export `compile_commands.json` for clangd.
-   - Pass the embedded target triple to clangd and clang-tidy so host LLVM tools understand ARM CPU flags.
+   - Pass the embedded target triple to clangd and clang-tidy when the target compiler flags require it.
    - Use Ninja for builds.
-   - Produce `.elf`, `.bin`, `.hex`, `.map`, and size output.
+   - Produce the firmware artifacts expected by the target ecosystem, such as `.elf`, `.bin`, `.hex`, `.map`, `.uf2`, or vendor-specific images.
 
-7. Wire editor, flashing, and debug.
-   - Recommend VS Code extensions: clangd, CMake Tools, Cortex-Debug.
+8. Wire editor, flashing, and debug.
+   - Recommend VS Code extensions that match the target: clangd and CMake Tools for CMake flows, Cortex-Debug for Cortex-M GDB flows, and ecosystem-specific extensions only when they help the selected target.
    - Disable competing IntelliSense when clangd owns semantic analysis.
-   - Use OpenOCD with ST-Link or J-Link as the GDB server.
-   - Keep shell and PowerShell command entry points for build, format, analyze, flash, and OpenOCD server startup when generating a cross-platform scaffold.
+   - Use OpenOCD with ST-Link or J-Link when that is the right GDB server for the selected target.
+   - Set flash/debug config from the actual target and probe. Do not invent OpenOCD target names; ask the user or inspect existing project files when uncertain.
+   - Keep shell and PowerShell command entry points for build, format, analyze, flash, and debug-server startup when generating a cross-platform scaffold.
 
 ## Validation
 
-Run what is available locally:
+Run what is available locally. For the bundled direct Cortex-M scaffold, use:
 
 ```bash
-cmake --preset stm32-debug
-cmake --build --preset stm32-debug
+cmake --preset firmware-debug
+cmake --build --preset firmware-debug
 bash scripts/format.sh --check
-cmake --preset stm32-analyze
-cmake --build --preset stm32-analyze
+cmake --preset firmware-analyze
+cmake --build --preset firmware-analyze
 ```
 
 On Windows, use the generated PowerShell entry points such as `pwsh scripts/build.ps1`, `pwsh scripts/format.ps1 -Check`, and `pwsh scripts/analyze.ps1`.
 
-Run flashing or debug validation only when hardware is attached and the user expects hardware access:
+For ESP-IDF, AVR, Pico SDK, Zephyr, or RTOS projects, use the ecosystem-native validation commands after adding the shared editor/format/CI layers, for example `idf.py build`, `west build`, Pico SDK CMake presets, `avr-gcc`/`avrdude` smoke commands, or the existing project scripts.
+
+For the bundled direct Cortex-M scaffold, run flashing or debug validation only when hardware is attached and the user expects hardware access:
 
 ```bash
 bash scripts/flash.sh
 bash scripts/openocd_server.sh
 ```
 
-If `clang-format`, `clang-tidy`, `arm-none-eabi-gcc`, OpenOCD, or hardware is unavailable, report the skipped step and leave the project ready for that tool.
+If `clang-format`, `clang-tidy`, the selected target compiler, flash/debug tools, or hardware are unavailable, report the skipped step and leave the project ready for that tool.
 
 ## References
 
-- Read `references/embedded-project-blueprint.md` when choosing directory layout, CMake/toolchain settings, STM32 software layers, flashing/debug flow, or CI design.
+- Read `references/embedded-project-blueprint.md` when choosing directory layout, CMake/toolchain settings, target ecosystem layers, target-family parameters, flashing/debug flow, or CI design.
 - Read the scaffold script before changing generated linker/startup defaults, supported MCU arguments, or generated command entry points.
 - Read `assets/` before changing standard generated configuration files; treat those files as templates and keep board-, MCU-, probe-, and project-specific values behind `@PLACEHOLDER@` variables.

@@ -29,34 +29,31 @@ These skills are meant for agents, not just humans reading setup notes. They gui
 List installable skills from this repository:
 
 ```bash
-npx skills add Victory-7291/project-scaffold-setup-skills --list
+npx skills add https://github.com/Victory-7291/project-scaffold-setup-skills --list
 ```
 
 Install every skill:
 
 ```bash
-npx skills add Victory-7291/project-scaffold-setup-skills
+npx skills add https://github.com/Victory-7291/project-scaffold-setup-skills 
 ```
 
 Install only the C++ project setup skill:
 
 ```bash
-npx skills add Victory-7291/project-scaffold-setup-skills \
-  --skill cpp-project-setup
+npx skills add https://github.com/Victory-7291/project-scaffold-setup-skills --skill cpp-project-setup
 ```
 
 Install only the embedded firmware setup skill:
 
 ```bash
-npx skills add Victory-7291/project-scaffold-setup-skills \
-  --skill embedded-project-setup
+npx skills add https://github.com/Victory-7291/project-scaffold-setup-skills --skill embedded-project-setup
 ```
 
 Install only the Python FastAPI setup skill:
 
 ```bash
-npx skills add Victory-7291/project-scaffold-setup-skills \
-  --skill python-fastapi-setup
+npx skills add https://github.com/Victory-7291/project-scaffold-setup-skills --skill python-fastapi-setup
 ```
 
 ## Example Prompts

@@ -1,8 +1,8 @@
 {
   "cmake.useCMakePresets": "always",
   "cmake.configureOnOpen": true,
-  "cmake.configurePreset": "stm32-debug",
-  "cmake.buildPreset": "stm32-debug",
+  "cmake.configurePreset": "@DEBUG_PRESET@",
+  "cmake.buildPreset": "@DEBUG_PRESET@",
   "C_Cpp.intelliSenseEngine": "disabled",
   "C_Cpp.autocomplete": "disabled",
   "clangd.arguments": [

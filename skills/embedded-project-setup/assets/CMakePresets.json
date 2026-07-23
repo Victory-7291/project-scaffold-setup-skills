@@ -17,33 +17,33 @@
       }
     },
     {
-      "name": "stm32-debug",
+      "name": "@DEBUG_PRESET@",
       "inherits": "base",
-      "displayName": "STM32 Debug",
+      "displayName": "@TARGET_FAMILY_DISPLAY@ Debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
-      "name": "stm32-release",
+      "name": "@RELEASE_PRESET@",
       "inherits": "base",
-      "displayName": "STM32 Release",
+      "displayName": "@TARGET_FAMILY_DISPLAY@ Release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
     },
     {
-      "name": "stm32-analyze",
-      "inherits": "stm32-debug",
-      "displayName": "STM32 clang-tidy",
+      "name": "@ANALYZE_PRESET@",
+      "inherits": "@DEBUG_PRESET@",
+      "displayName": "@TARGET_FAMILY_DISPLAY@ clang-tidy",
       "cacheVariables": {
         "@UPPER@_ENABLE_CLANG_TIDY": "ON"
       }
     }
   ],
   "buildPresets": [
-    { "name": "stm32-debug", "configurePreset": "stm32-debug" },
-    { "name": "stm32-release", "configurePreset": "stm32-release" },
-    { "name": "stm32-analyze", "configurePreset": "stm32-analyze" }
+    { "name": "@DEBUG_PRESET@", "configurePreset": "@DEBUG_PRESET@" },
+    { "name": "@RELEASE_PRESET@", "configurePreset": "@RELEASE_PRESET@" },
+    { "name": "@ANALYZE_PRESET@", "configurePreset": "@ANALYZE_PRESET@" }
   ]
 }

@@ -1,4 +1,4 @@
 interface:
   display_name: "Embedded Project Setup"
-  short_description: "Scaffold or modernize platform-aware firmware"
-  default_prompt: "Use $embedded-project-setup to inspect the working directory, detect the user's OS/architecture, identify the MCU target, then create or modernize a STM32/Cortex-M embedded C firmware project with CMake, Ninja, clangd, clang-format, clang-tidy, OpenOCD, Cortex-Debug, and CI-ready structure."
+  short_description: "Scaffold or modernize Cortex-M firmware"
+  default_prompt: "Use $embedded-project-setup to inspect the working directory, detect the user's OS/architecture, identify the Cortex-M MCU, board, memory map, and OpenOCD target, then create or modernize an embedded C firmware project with CMake, Ninja, arm-none-eabi-gcc/gdb, clangd, clang-format, clang-tidy, OpenOCD, Cortex-Debug, Docker, and GitHub Actions."
