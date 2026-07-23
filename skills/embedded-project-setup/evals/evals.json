@@ -28,7 +28,8 @@
         "ldscripts/nrf52_logger_flash.ld has flash origin 0x00000000, 1024K flash, RAM origin 0x20000000, and 256K RAM",
         ".vscode/launch.json references interface/jlink.cfg and target/nrf52.cfg",
         "src/ contains app/, bsp/, and drivers/ subdirectories",
-        "README.md notes the nRF52840 target, custom board, and CMSIS/vendor SDK integration path"
+        "README.md notes the nRF52840 target, custom board, and CMSIS/vendor SDK integration path",
+        "README.md records whether the project is using nRF Connect SDK/west or direct nrfx+CMSIS, including package path and version assumptions"
       ]
     },
     {
@@ -45,6 +46,20 @@
         ".vscode/launch.json uses Cortex-Debug with OpenOCD and J-Link",
         "scripts/flash.sh and scripts/openocd_server.sh are added",
         "README.md documents the new build/flash workflow and target-specific memory/debug assumptions"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Create a new STM32G0 firmware project in /tmp/embedded_eval_stm32g0_cube for an STM32G031K8 Nucleo-style board. Use a CMake + Ninja + arm-none-eabi-gcc workflow, but do not rely on CubeMX output. Bring in the official STM32CubeG0 firmware package under vendor/STM32CubeG0 if network/package access is available; otherwise write the exact commands and leave non-fake placeholders. Wire the project to CMSIS Core/Device and selected STM32G0 HAL/LL paths instead of hand-writing imaginary headers.",
+      "expected_output": "A STM32G0 scaffold or modernization plan that explicitly selects and pins STM32CubeG0, documents vendor/STM32CubeG0 or an external package path, uses real CMSIS/HAL include/source paths, keeps app/, bsp/, and drivers/ layering, and preserves the shared editor/build/CI workflow.",
+      "files": [],
+      "expectations": [
+        "README.md names STM32CubeG0 as the firmware package, includes its source URL, and records the intended local path and tag/commit",
+        "If vendor/STM32CubeG0 is not actually fetched, the output contains exact git clone or git submodule commands and does not create fake CMSIS/HAL files",
+        "CMakeLists.txt or the documented plan uses real STM32CubeG0 paths under Drivers/CMSIS and Drivers/STM32G0xx_HAL_Driver",
+        "The project has a project-owned HAL config header such as stm32g0xx_hal_conf.h when HAL is enabled",
+        "Application code remains above bsp/ and drivers/ and does not directly depend on Cube example project layout",
+        "Validation includes checking the package path/pin as well as configuring/building the firmware when tools are available"
       ]
     }
   ]

@@ -44,7 +44,7 @@ For existing firmware, write down the current pipeline before editing:
 - Build system: CMake, Make, vendor IDE, CubeMX output, custom scripts, or mixed.
 - Toolchain: `arm-none-eabi-gcc`, vendor compiler, clang-based flow, compiler version, CPU/FPU/float ABI flags.
 - Firmware target: vendor/family, MCU, board, memory origins and sizes, linker script, startup file, vector table, bootloader assumptions.
-- Dependency model: CMSIS, vendor HAL/LL or SDK drivers, bare-metal, submodules, generated vendor trees, package managers.
+- Dependency model: firmware package/SDK name, version/tag, source URL, local path, CMSIS when applicable, vendor HAL/LL or SDK drivers, RTOS kernel, submodules, `west` manifests, generated vendor trees, package managers, or global SDK paths.
 - Developer entry points: presets, scripts, VS Code tasks, flash/debug commands, OpenOCD/J-Link configs.
 - Quality gates: format, lint/static analysis, host tests, firmware artifacts, CI and release upload.
 
@@ -62,6 +62,23 @@ Choose the developer host profile from the user's real machine, not necessarily 
 | `linux-arm64` | Same package families as Linux x64 | Some distros lag on embedded toolchain package versions. |
 | `windows-x64` | Arm GNU Toolchain for Windows, CMake, Ninja, OpenOCD, LLVM tools on `PATH` | Use PowerShell scripts or a shell with the same tools on `PATH`. |
 | `windows-arm64` | Native arm64 packages when available; otherwise compatible x64 tools | Verify debugger/probe drivers on the target machine. |
+
+## Firmware Package First
+
+Choose and pin the target firmware package before generating include paths or source lists. The package is the layer that replaces the blind parts of vendor IDE or CubeMX output: CMSIS/device headers, HAL/LL or SDK drivers, startup/linker examples, board support, middleware, RTOS integration, and flash/debug conventions.
+
+Use `references/firmware-package-matrix.md` for the detailed target-to-package mapping. The short version:
+
+| Target | Package decision |
+| --- | --- |
+| STM32 | Use the matching `STM32Cube<series>` package, such as `STM32CubeG0`, under `vendor/` or an external path. Select CMSIS and the HAL/LL files needed by the app; do not compile every example. |
+| ESP32 | Use ESP-IDF and `idf.py`; avoid generic Arm CMake toolchains. |
+| AVR | Use AVR GNU Toolchain plus AVR-LibC, with Microchip `.atpack` device support when required. CMSIS is not part of this stack. |
+| RP2040/RP2350 | Use Pico SDK through `PICO_SDK_PATH`, a submodule, or the SDK import file. |
+| Nordic nRF | Prefer nRF Connect SDK managed by `west`; use direct `nrfx` plus CMSIS only for explicit bare-metal or legacy needs. |
+| Zephyr/RTOS | Let Zephyr or the vendor RTOS package own board, startup, linker, devicetree/Kconfig, and flash runners where applicable. For standalone FreeRTOS, pick the vendor silicon package first, then add the RTOS kernel. |
+
+Document the dependency path in the README. If package fetching needs network approval, leave exact commands rather than fake files.
 
 ## Greenfield Layout
 
@@ -88,6 +105,8 @@ firmware/
     startup.c
   ldscripts/
     <mcu>_flash.ld
+  vendor/
+    README.md
   scripts/
     build.sh
     build.ps1
@@ -110,6 +129,8 @@ firmware/
   .github/workflows/firmware.yml
   README.md
 ```
+
+Treat `vendor/` as optional and target-specific. STM32Cube and Pico SDK often fit there as pinned submodules. ESP-IDF, nRF Connect SDK, and Zephyr often use external SDK paths or `west` workspaces instead of a per-project vendor tree. If the target uses `west`, place `west.yml`, board overlays, `prj.conf`, and application CMake files according to the Zephyr/NCS application model rather than forcing this direct Cortex-M layout.
 
 ## Target Model
 
@@ -146,7 +167,7 @@ Use `@PLACEHOLDER@` values for firmware target names, target family, board, MCU,
 
 ## Layering
 
-Keep the software stack explicit:
+Keep the software stack explicit. A direct Cortex-M STM32-style project often looks like this:
 
 ```text
 Application
@@ -157,11 +178,13 @@ Application
   -> MCU peripheral hardware
 ```
 
-- Use CMSIS for CPU/device definitions when available.
+- Use CMSIS for CPU/device definitions when available on Cortex-M targets.
 - Use vendor HALs or SDK drivers when portability, official examples, and team velocity matter.
 - Use lower-level vendor APIs when peripheral paths need less abstraction but still benefit from vendor definitions.
 - Use bare-metal registers for startup, board smoke tests, bootloaders, or tightly constrained paths.
 - Do not treat `clangd` as the compiler; it consumes `compile_commands.json` produced by CMake.
+
+For ESP-IDF, Pico SDK, Zephyr, nRF Connect SDK, Arduino cores, and other framework-led projects, preserve the framework's own layer model. Do not rewrite those ecosystems into a generic CMSIS/HAL shape.
 
 ## CMake Decisions
 
@@ -197,3 +220,4 @@ Application
 - Do not move vendor HAL/CMSIS/SDK trees unless all include paths, linker/startup references, docs, and CI are updated.
 - Preserve chip-specific linker scripts and startup files unless the target MCU changes.
 - Treat CubeMX-generated files as user/vendor-owned unless the repo already marks editable sections.
+- Preserve the existing package pinning model unless there is a clear reason to change it. If you convert a zip-vendored package to a submodule, or a global SDK path to a local manifest, update clone/setup docs and CI in the same change.
