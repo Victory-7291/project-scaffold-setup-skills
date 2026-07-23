@@ -1,0 +1,83 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "stm32: build",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/build.sh"
+      ],
+      "windows": {
+        "command": "pwsh",
+        "args": [
+          "-File",
+          "${workspaceFolder}/scripts/build.ps1"
+        ]
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
+      "label": "stm32: analyze",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/analyze.sh"
+      ],
+      "windows": {
+        "command": "pwsh",
+        "args": [
+          "-File",
+          "${workspaceFolder}/scripts/analyze.ps1"
+        ]
+      },
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
+      "label": "stm32: flash",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/flash.sh"
+      ],
+      "windows": {
+        "command": "pwsh",
+        "args": [
+          "-File",
+          "${workspaceFolder}/scripts/flash.ps1"
+        ]
+      },
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
+      "label": "stm32: openocd",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/openocd_server.sh"
+      ],
+      "windows": {
+        "command": "pwsh",
+        "args": [
+          "-File",
+          "${workspaceFolder}/scripts/openocd_server.ps1"
+        ]
+      },
+      "presentation": {
+        "clear": true,
+        "panel": "dedicated",
+        "reveal": "always"
+      }
+    }
+  ]
+}

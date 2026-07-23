@@ -1,4 +1,0 @@
-interface:
-  display_name: "Java Spring Setup"
-  short_description: "Build production-minded Spring Boot services"
-  default_prompt: "Use $java-spring-setup to scaffold or standardize a Java Spring Boot service with Maven, Web MVC, typed configuration, validation, Actuator health/metrics, tests, and optional PostgreSQL/Docker production wiring."

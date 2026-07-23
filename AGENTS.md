@@ -49,7 +49,7 @@ PYTHONPYCACHEPREFIX=/tmp/codex-pycache python3 -m py_compile skills/*/scripts/*.
 ```bash
 python3 skills/cpp-project-setup/scripts/scaffold_cpp_project.py --help
 python3 skills/embedded-project-setup/scripts/scaffold_embedded_project.py --help
-python3 skills/java-spring-setup/scripts/scaffold_java_spring_project.py --help
+python3 skills/python-fastapi-setup/scripts/scaffold_fastapi_project.py --help
 ```
 
 生成临时项目做烟测：
@@ -66,12 +66,12 @@ python3 skills/embedded-project-setup/scripts/scaffold_embedded_project.py \
   --name smoke_fw \
   --out /tmp/codex-skill-smoke/smoke_fw
 
-python3 skills/java-spring-setup/scripts/scaffold_java_spring_project.py \
-  --name smoke-spring \
-  --out /tmp/codex-skill-smoke/smoke_spring
+python3 skills/python-fastapi-setup/scripts/scaffold_fastapi_project.py \
+  --name smoke_api \
+  --out /tmp/codex-skill-smoke/smoke_api
 ```
 
-如果本机缺少 CMake、vcpkg、交叉编译器、OpenOCD、硬件、Java、Maven、Docker 或 Maven 依赖下载能力，不要伪造验证结果；说明依赖缺失，并保留可复现命令。
+如果本机缺少 Python、CMake、vcpkg、交叉编译器、OpenOCD、硬件或 Docker 能力，不要伪造验证结果；说明依赖缺失，并保留可复现命令。
 
 ## 提交前注意
 

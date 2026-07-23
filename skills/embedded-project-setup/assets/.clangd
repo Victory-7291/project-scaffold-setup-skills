@@ -1,0 +1,6 @@
+CompileFlags:
+  CompilationDatabase: build/@CLANGD_PRESET@
+  Add:
+    - --target=@CLANG_TARGET@
+Diagnostics:
+  ClangTidy: true

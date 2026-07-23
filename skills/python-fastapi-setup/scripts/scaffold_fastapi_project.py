@@ -10,6 +10,9 @@ import textwrap
 from pathlib import Path
 
 
+ASSETS_DIR = Path(__file__).resolve().parent.parent / "assets"
+
+
 def safe_name(value: str) -> str:
     name = re.sub(r"[^A-Za-z0-9]+", "_", value.strip()).strip("_").lower()
     if not name:
@@ -36,6 +39,10 @@ def render(template: str, **values: str) -> str:
     return result
 
 
+def render_asset(relative: str, **values: str) -> str:
+    return render((ASSETS_DIR / relative).read_text(encoding="utf-8"), **values)
+
+
 def write_file(root: Path, relative: str, content: str, *, executable: bool = False, force: bool = False) -> None:
     path = root / relative
     if path.exists() and not force:
@@ -46,36 +53,8 @@ def write_file(root: Path, relative: str, content: str, *, executable: bool = Fa
         path.chmod(path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 
-def dependency_block(process_manager: str) -> str:
-    lines = [
-        '  "fastapi>=0.116.0",',
-        '  "uvicorn[standard]>=0.35.0",',
-        '  "pydantic-settings>=2.10.0",',
-    ]
-    if process_manager == "gunicorn":
-        lines.extend([
-            '  "gunicorn>=23.0.0",',
-            '  "uvicorn-worker>=0.3.0",',
-        ])
-    return "\n".join(lines)
-
-
-def docker_cmd(process_manager: str) -> str:
-    if process_manager == "gunicorn":
-        return 'CMD ["gunicorn", "-c", "gunicorn.conf.py", "app.main:app"]'
-    return 'CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]'
-
-
-def docker_copy_gunicorn(process_manager: str) -> str:
-    if process_manager == "gunicorn":
-        return "COPY gunicorn.conf.py ./gunicorn.conf.py"
-    return ""
-
-
-def production_command(process_manager: str) -> str:
-    if process_manager == "gunicorn":
-        return "gunicorn -c gunicorn.conf.py app.main:app"
-    return "uvicorn app.main:app --host 0.0.0.0 --port 8000"
+def production_command() -> str:
+    return "gunicorn -c gunicorn.conf.py app.main:app"
 
 
 def main() -> int:
@@ -83,13 +62,6 @@ def main() -> int:
     parser.add_argument("--name", required=True, help="Service name, for example inventory_api")
     parser.add_argument("--out", help="Output directory. Defaults to ./<sanitized-name>.")
     parser.add_argument("--port", default="8000", help="Local service port used in docs and Compose")
-    parser.add_argument(
-        "--process-manager",
-        default="uvicorn",
-        choices=["uvicorn", "gunicorn"],
-        help="Production process command to document and generate",
-    )
-    parser.add_argument("--with-docker", action="store_true", help="Add Dockerfile, .dockerignore, and docker-compose.yml")
     parser.add_argument("--python-version", default="3.13", help="Python minor version for Docker ARG")
     parser.add_argument("--force", action="store_true", help="Overwrite scaffold-owned files if they already exist")
     args = parser.parse_args()
@@ -106,10 +78,7 @@ def main() -> int:
         "PACKAGE": package,
         "TITLE": title,
         "PORT": str(args.port),
-        "DEPENDENCIES": dependency_block(args.process_manager),
-        "PRODUCTION_COMMAND": production_command(args.process_manager),
-        "DOCKER_CMD": docker_cmd(args.process_manager),
-        "DOCKER_COPY_GUNICORN": docker_copy_gunicorn(args.process_manager),
+        "PRODUCTION_COMMAND": production_command(),
         "PYTHON_VERSION": args.python_version,
     }
 
@@ -291,39 +260,7 @@ def main() -> int:
             ),
             False,
         ),
-        "pyproject.toml": (
-            render(
-                '''
-                [build-system]
-                requires = ["setuptools>=68"]
-                build-backend = "setuptools.build_meta"
-
-                [project]
-                name = "@PACKAGE@"
-                version = "0.1.0"
-                description = "FastAPI service scaffold"
-                readme = "README.md"
-                requires-python = ">=3.11"
-                dependencies = [
-                @DEPENDENCIES@
-                ]
-
-                [project.optional-dependencies]
-                dev = [
-                  "httpx>=0.28.0",
-                  "pytest>=8.0.0",
-                ]
-
-                [tool.setuptools.packages.find]
-                include = ["app*"]
-
-                [tool.pytest.ini_options]
-                testpaths = ["tests"]
-                ''',
-                **values,
-            ),
-            False,
-        ),
+        "pyproject.toml": (render_asset("pyproject.toml", **values), False),
         ".env.example": (
             render(
                 '''
@@ -397,109 +334,21 @@ def main() -> int:
         ),
     }
 
-    if args.process_manager == "gunicorn":
-        files["gunicorn.conf.py"] = (
-            render(
-                '''
-                import multiprocessing
-                import os
-
-
-                bind = os.getenv("GUNICORN_BIND", "0.0.0.0:@PORT@")
-                workers = int(os.getenv("GUNICORN_WORKERS", str((multiprocessing.cpu_count() * 2) + 1)))
-                worker_class = os.getenv("GUNICORN_WORKER_CLASS", "uvicorn_worker.UvicornWorker")
-                timeout = int(os.getenv("GUNICORN_TIMEOUT", "30"))
-                keepalive = int(os.getenv("GUNICORN_KEEPALIVE", "5"))
-                accesslog = "-"
-                errorlog = "-"
-                ''',
-                **values,
-            ),
-            False,
-        )
-
-    if args.with_docker:
-        files.update(
-            {
-                ".dockerignore": (
-                    render(
-                        '''
-                        .git
-                        .venv
-                        __pycache__
-                        .pytest_cache
-                        *.pyc
-                        .env
-                        dist
-                        build
-                        *.egg-info
-                        ''',
-                        **values,
-                    ),
-                    False,
-                ),
-                "Dockerfile": (
-                    render(
-                        '''
-                        ARG PYTHON_VERSION=@PYTHON_VERSION@
-                        FROM python:${PYTHON_VERSION}-slim
-
-                        ENV PYTHONDONTWRITEBYTECODE=1 \\
-                            PYTHONUNBUFFERED=1
-
-                        WORKDIR /app
-
-                        COPY pyproject.toml README.md ./
-                        COPY app ./app
-                        @DOCKER_COPY_GUNICORN@
-
-                        RUN python -m pip install --no-cache-dir --upgrade pip \\
-                            && python -m pip install --no-cache-dir .
-
-                        EXPOSE 8000
-
-                        HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \\
-                          CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()" || exit 1
-
-                        @DOCKER_CMD@
-                        ''',
-                        **values,
-                    ).replace("\nCOPY app ./app\n\n\nRUN", "\nCOPY app ./app\n\nRUN"),
-                    False,
-                ),
-                "docker-compose.yml": (
-                    render(
-                        '''
-                        services:
-                          api:
-                            build: .
-                            ports:
-                              - "@PORT@:8000"
-                            env_file:
-                              - .env
-                            healthcheck:
-                              test:
-                                - CMD
-                                - python
-                                - -c
-                                - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"
-                              interval: 30s
-                              timeout: 5s
-                              retries: 3
-                        ''',
-                        **values,
-                    ),
-                    False,
-                ),
-            }
-        )
+    files.update(
+        {
+            "gunicorn.conf.py": (render_asset("gunicorn.conf.py", **values), False),
+            ".dockerignore": (render_asset(".dockerignore", **values), False),
+            "Dockerfile": (render_asset("Dockerfile", **values), False),
+            "docker-compose.yml": (render_asset("docker-compose.yml", **values), False),
+        }
+    )
 
     for relative, (content, executable) in files.items():
         write_file(root, relative, content, executable=executable, force=args.force)
 
     print(f"Created FastAPI scaffold at {root}")
     print(f"Development: uvicorn app.main:app --host 0.0.0.0 --port {args.port} --reload")
-    print(f"Production:  {production_command(args.process_manager)}")
+    print(f"Production:  {production_command()}")
     return 0
 
 

@@ -39,6 +39,7 @@ python3 scripts/scaffold_cpp_project.py \
   --host-platform macos-arm64
 ```
 
+   - The scaffold script renders reusable standard configuration from `assets/` for CMake, CMake presets, vcpkg, and VS Code. Update those assets when the shared project standard changes; update the Python script when generation logic, arguments, or dynamic source files change.
    - For existing projects, use `references/cpp-project-blueprint.md` as a checklist and adapt to the repository's current style instead of replacing unrelated files.
    - Omit `--host-platform` only when generating on the same machine where the project will be developed; the script will auto-detect that host.
 
@@ -83,3 +84,4 @@ Adjust preset names for the selected host profile. On Windows, use `pwsh scripts
 
 - Read `references/cpp-project-blueprint.md` when choosing project layout, presets, dependency policy, editor settings, tests, formatting, linting, docs, or CI details.
 - Read the scaffold script before changing its generated files or adding new options.
+- Read `assets/` before changing standard generated configuration files; treat those files as templates and keep project-specific values behind `@PLACEHOLDER@` variables.

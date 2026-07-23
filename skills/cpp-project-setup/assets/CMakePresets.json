@@ -1,0 +1,228 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 24,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/.vcpkg/scripts/buildsystems/vcpkg.cmake"
+      }
+    },
+    {
+      "name": "macos-arm64-debug",
+      "inherits": "base",
+      "displayName": "macOS arm64 Debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "VCPKG_TARGET_TRIPLET": "arm64-osx"
+      }
+    },
+    {
+      "name": "macos-arm64-release",
+      "inherits": "base",
+      "displayName": "macOS arm64 Release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "VCPKG_TARGET_TRIPLET": "arm64-osx"
+      }
+    },
+    {
+      "name": "macos-arm64-tidy",
+      "inherits": "macos-arm64-debug",
+      "displayName": "macOS arm64 clang-tidy",
+      "cacheVariables": {
+        "@UPPER@_ENABLE_CLANG_TIDY": "ON"
+      }
+    },
+    {
+      "name": "macos-x64-debug",
+      "inherits": "base",
+      "displayName": "macOS x64 Debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "VCPKG_TARGET_TRIPLET": "x64-osx"
+      }
+    },
+    {
+      "name": "macos-x64-release",
+      "inherits": "base",
+      "displayName": "macOS x64 Release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "VCPKG_TARGET_TRIPLET": "x64-osx"
+      }
+    },
+    {
+      "name": "macos-x64-tidy",
+      "inherits": "macos-x64-debug",
+      "displayName": "macOS x64 clang-tidy",
+      "cacheVariables": {
+        "@UPPER@_ENABLE_CLANG_TIDY": "ON"
+      }
+    },
+    {
+      "name": "linux-x64-debug",
+      "inherits": "base",
+      "displayName": "Linux x64 Debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "VCPKG_TARGET_TRIPLET": "x64-linux"
+      }
+    },
+    {
+      "name": "linux-x64-release",
+      "inherits": "base",
+      "displayName": "Linux x64 Release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "VCPKG_TARGET_TRIPLET": "x64-linux"
+      }
+    },
+    {
+      "name": "linux-x64-tidy",
+      "inherits": "linux-x64-debug",
+      "displayName": "Linux x64 clang-tidy",
+      "cacheVariables": {
+        "@UPPER@_ENABLE_CLANG_TIDY": "ON"
+      }
+    },
+    {
+      "name": "linux-arm64-debug",
+      "inherits": "base",
+      "displayName": "Linux arm64 Debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "VCPKG_TARGET_TRIPLET": "arm64-linux"
+      }
+    },
+    {
+      "name": "linux-arm64-release",
+      "inherits": "base",
+      "displayName": "Linux arm64 Release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "VCPKG_TARGET_TRIPLET": "arm64-linux"
+      }
+    },
+    {
+      "name": "linux-arm64-tidy",
+      "inherits": "linux-arm64-debug",
+      "displayName": "Linux arm64 clang-tidy",
+      "cacheVariables": {
+        "@UPPER@_ENABLE_CLANG_TIDY": "ON"
+      }
+    },
+    {
+      "name": "windows-x64-debug",
+      "inherits": "base",
+      "displayName": "Windows x64 Debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "VCPKG_TARGET_TRIPLET": "x64-windows"
+      }
+    },
+    {
+      "name": "windows-x64-release",
+      "inherits": "base",
+      "displayName": "Windows x64 Release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "VCPKG_TARGET_TRIPLET": "x64-windows"
+      }
+    },
+    {
+      "name": "windows-x64-tidy",
+      "inherits": "windows-x64-debug",
+      "displayName": "Windows x64 clang-tidy",
+      "cacheVariables": {
+        "@UPPER@_ENABLE_CLANG_TIDY": "ON"
+      }
+    },
+    {
+      "name": "windows-arm64-debug",
+      "inherits": "base",
+      "displayName": "Windows arm64 Debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "VCPKG_TARGET_TRIPLET": "arm64-windows"
+      }
+    },
+    {
+      "name": "windows-arm64-release",
+      "inherits": "base",
+      "displayName": "Windows arm64 Release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "VCPKG_TARGET_TRIPLET": "arm64-windows"
+      }
+    },
+    {
+      "name": "windows-arm64-tidy",
+      "inherits": "windows-arm64-debug",
+      "displayName": "Windows arm64 clang-tidy",
+      "cacheVariables": {
+        "@UPPER@_ENABLE_CLANG_TIDY": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "macos-arm64-debug", "configurePreset": "macos-arm64-debug" },
+    { "name": "macos-arm64-release", "configurePreset": "macos-arm64-release" },
+    { "name": "macos-arm64-tidy", "configurePreset": "macos-arm64-tidy" },
+    { "name": "macos-x64-debug", "configurePreset": "macos-x64-debug" },
+    { "name": "macos-x64-release", "configurePreset": "macos-x64-release" },
+    { "name": "macos-x64-tidy", "configurePreset": "macos-x64-tidy" },
+    { "name": "linux-x64-debug", "configurePreset": "linux-x64-debug" },
+    { "name": "linux-x64-release", "configurePreset": "linux-x64-release" },
+    { "name": "linux-x64-tidy", "configurePreset": "linux-x64-tidy" },
+    { "name": "linux-arm64-debug", "configurePreset": "linux-arm64-debug" },
+    { "name": "linux-arm64-release", "configurePreset": "linux-arm64-release" },
+    { "name": "linux-arm64-tidy", "configurePreset": "linux-arm64-tidy" },
+    { "name": "windows-x64-debug", "configurePreset": "windows-x64-debug" },
+    { "name": "windows-x64-release", "configurePreset": "windows-x64-release" },
+    { "name": "windows-x64-tidy", "configurePreset": "windows-x64-tidy" },
+    { "name": "windows-arm64-debug", "configurePreset": "windows-arm64-debug" },
+    { "name": "windows-arm64-release", "configurePreset": "windows-arm64-release" },
+    { "name": "windows-arm64-tidy", "configurePreset": "windows-arm64-tidy" }
+  ],
+  "testPresets": [
+    {
+      "name": "macos-arm64-debug",
+      "configurePreset": "macos-arm64-debug",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "macos-x64-debug",
+      "configurePreset": "macos-x64-debug",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "linux-x64-debug",
+      "configurePreset": "linux-x64-debug",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "linux-arm64-debug",
+      "configurePreset": "linux-arm64-debug",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "windows-x64-debug",
+      "configurePreset": "windows-x64-debug",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "windows-arm64-debug",
+      "configurePreset": "windows-arm64-debug",
+      "output": { "outputOnFailure": true }
+    }
+  ]
+}

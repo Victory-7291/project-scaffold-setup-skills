@@ -1,6 +1,6 @@
 ---
 name: python-fastapi-setup
-description: Create, standardize, or modernize Python FastAPI service projects with `app/main.py`, versioned API routers, pydantic-settings configuration, lifespan-managed `app.state` services, dependency accessors, request ID/CORS middleware, health checks, pytest/TestClient tests, direct Uvicorn/FastAPI CLI startup, optional Docker/Compose files, and optional Gunicorn via `uvicorn-worker`. Use whenever the user asks to scaffold a FastAPI API/service, clean up single-file or wrapper-launched FastAPI code, add settings/middleware/routers/tests/deployment files, or prepare a Python web service for local development and production operation. Prefer another skill for non-Python APIs, Flask/Django-only projects, frontend-only work, or database-specific Supabase tasks.
+description: Create, standardize, or modernize Python FastAPI service projects with `app/main.py`, versioned API routers, pydantic-settings configuration, lifespan-managed `app.state` services, dependency accessors, request ID/CORS middleware, health checks, pytest/TestClient tests, direct Uvicorn local startup, default Gunicorn production via `uvicorn-worker`, and default Docker/Compose deployment files. Use whenever the user asks to scaffold a FastAPI API/service, clean up single-file or wrapper-launched FastAPI code, add settings/middleware/routers/tests/deployment files, or prepare a Python web service for local development and production operation. Prefer another skill for non-Python APIs, Flask/Django-only projects, frontend-only work, or database-specific Supabase tasks.
 ---
 
 # Python FastAPI Setup
@@ -30,8 +30,8 @@ python3 scripts/scaffold_fastapi_project.py \
   --out /path/to/inventory_api
 ```
 
-   - Add `--with-docker` when the user asks for Docker or Compose.
-   - Add `--process-manager gunicorn` only when the user explicitly wants Gunicorn or a non-container process manager. The script uses `uvicorn-worker`, not the deprecated `uvicorn.workers` module.
+   - The scaffold always generates `gunicorn.conf.py`, Docker, and Compose files for a production-ready default.
+   - The scaffold script renders reusable project and deployment configuration from `assets/` for `pyproject.toml`, Docker, Compose, and Gunicorn. Update those assets when the shared standard changes; update the Python script when generation logic, arguments, app files, or dependency policy change.
    - Read `references/python-fastapi-blueprint.md` before changing generated files or adding new script options.
 
 3. For existing projects, patch conservatively.
@@ -63,8 +63,8 @@ python3 scripts/scaffold_fastapi_project.py \
 7. Choose deployment commands by environment.
    - Local development: `uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload`
    - Local smoke test: `uvicorn app.main:app --host 0.0.0.0 --port 8000`
-   - Container default: one Uvicorn/FastAPI process per container; let Kubernetes, Compose, or the platform replicate containers.
-   - Non-container process manager: use Gunicorn with the external `uvicorn-worker` package, for example `gunicorn -c gunicorn.conf.py app.main:app`.
+   - Production default: use Gunicorn with the external `uvicorn-worker` package, for example `gunicorn -c gunicorn.conf.py app.main:app`.
+   - Container default: run the same Gunicorn command from `gunicorn.conf.py`; let Kubernetes, Compose, or the platform replicate containers.
    - Do not use `uvicorn.workers.UvicornWorker` in new code; Uvicorn documents that module as deprecated.
 
 8. Add tests and validation.
@@ -99,12 +99,16 @@ app/
 tests/
   test_health.py
 pyproject.toml
+gunicorn.conf.py
+Dockerfile
+docker-compose.yml
+.dockerignore
 .env.example
 .gitignore
 README.md
 ```
 
-Add Docker, Compose, `gunicorn.conf.py`, CI, database modules, schemas, services, or auth only when the user asks for them or the existing project already needs them.
+Add CI, database modules, schemas, services, or auth only when the user asks for them or the existing project already needs them.
 
 ## File Standards
 
@@ -135,8 +139,7 @@ Add Docker, Compose, `gunicorn.conf.py`, CI, database modules, schemas, services
 ### `pyproject.toml`
 
 - Keep runtime dependencies separate from optional dev/prod extras.
-- Include `fastapi`, `uvicorn[standard]`, and `pydantic-settings` for the default scaffold.
-- Add `gunicorn` and `uvicorn-worker` only when using Gunicorn.
+- Include unpinned `fastapi`, `uvicorn[standard]`, `pydantic-settings`, `gunicorn`, and `uvicorn-worker` for the default scaffold so pip resolves current compatible releases.
 
 ### Docker Files
 
@@ -156,14 +159,12 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 curl -fsS http://127.0.0.1:8000/health
 ```
 
-If Gunicorn files were added:
-
 ```bash
 gunicorn -c gunicorn.conf.py app.main:app
 curl -fsS http://127.0.0.1:8000/health
 ```
 
-If Docker files were added and the user wants container verification, run:
+If the user wants container verification, run:
 
 ```bash
 docker build -t fastapi-smoke .
@@ -177,3 +178,4 @@ Do not claim validation that did not run. If `fastapi`, `uvicorn`, `pytest`, Doc
 
 - Read `references/python-fastapi-blueprint.md` when choosing layout, lifespan/dependency patterns, deployment commands, Docker behavior, or eval expectations.
 - Read `scripts/scaffold_fastapi_project.py` before changing generated files or adding script options.
+- Read `assets/` before changing generated `pyproject.toml`, Docker, Compose, or Gunicorn configuration; treat those files as templates and keep service-specific values behind `@PLACEHOLDER@` variables.

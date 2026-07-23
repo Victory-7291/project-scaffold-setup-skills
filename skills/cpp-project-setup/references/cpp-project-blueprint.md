@@ -91,6 +91,18 @@ project/
   README.md
 ```
 
+## Reusable Templates
+
+Keep stable generated configuration in `assets/` and render it through the scaffold script:
+
+- `CMakeLists.txt`
+- `CMakePresets.json`
+- `vcpkg.json`
+- `.vscode/settings.json`
+- `.vscode/extensions.json`
+
+Use `@PLACEHOLDER@` values for project names, package names, selected host presets, C++ standard, and project-prefixed CMake options. Do not copy a real product's source list, bundle identifiers, local dependency paths, or platform-only presets into these templates.
+
 ## CMake Decisions
 
 - Set `CMAKE_EXPORT_COMPILE_COMMANDS` to `ON`.

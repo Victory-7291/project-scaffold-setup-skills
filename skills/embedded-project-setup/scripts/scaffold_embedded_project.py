@@ -98,6 +98,8 @@ OpenOCD, and LLVM tools. Prefer native arm64 packages when available and add
     },
 }
 
+ASSETS_DIR = Path(__file__).resolve().parent.parent / "assets"
+
 
 def detect_host_platform() -> str:
     system = platform.system().lower()
@@ -136,6 +138,10 @@ def render(template: str, **values: str) -> str:
     for key, value in values.items():
         result = result.replace(f"@{key}@", value)
     return result
+
+
+def render_asset(relative: str, **values: str) -> str:
+    return render((ASSETS_DIR / relative).read_text(encoding="utf-8"), **values)
 
 
 def write_file(root: Path, relative: str, content: str, *, executable: bool = False, force: bool = False) -> None:
@@ -1034,6 +1040,21 @@ def main() -> int:
             **values,
         ),
     }
+
+    template_files = {
+        "CMakeLists.txt": "CMakeLists.txt",
+        "CMakePresets.json": "CMakePresets.json",
+        ".vscode/extensions.json": "extensions.json",
+        ".vscode/settings.json": "settings.json",
+        ".vscode/launch.json": "launch.json",
+        ".vscode/tasks.json": "tasks.json",
+        ".clangd": ".clangd",
+        ".clang-tidy": ".clang-tidy",
+        "Dockerfile": "Dockerfile",
+        ".dockerignore": ".dockerignore",
+    }
+    for relative, asset in template_files.items():
+        files[relative] = render_asset(asset, **values)
 
     executable_files = {
         "scripts/build.sh",

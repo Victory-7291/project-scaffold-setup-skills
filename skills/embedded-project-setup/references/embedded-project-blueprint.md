@@ -111,6 +111,23 @@ firmware/
   README.md
 ```
 
+## Reusable Templates
+
+Keep stable generated configuration in `assets/` and render it through the scaffold script:
+
+- `CMakeLists.txt`
+- `CMakePresets.json`
+- `.clangd`
+- `.clang-tidy`
+- `.vscode/settings.json`
+- `.vscode/extensions.json`
+- `.vscode/launch.json`
+- `.vscode/tasks.json`
+- `Dockerfile`
+- `.dockerignore`
+
+Use `@PLACEHOLDER@` values for firmware target names, MCU, CPU flags, device defines, OpenOCD interface/target files, clang target, and selected clangd preset. Do not copy product secrets, absolute workstation paths, vendor tree assumptions, or a board-specific HAL source list into the generic templates.
+
 ## Layering
 
 Keep the software stack explicit:

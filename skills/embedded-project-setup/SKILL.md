@@ -41,6 +41,7 @@ python3 scripts/scaffold_embedded_project.py \
   --host-platform macos-arm64
 ```
 
+   - The scaffold script renders reusable standard configuration from `assets/` for CMake, presets, clangd/tidy, VS Code, Docker, and debug tasks. Update assets when the shared firmware standard changes; update the Python script when generation logic, MCU arguments, linker/startup defaults, or command entry points change.
    - For existing firmware, inspect `CMakeLists.txt`, `CMakePresets.json`, toolchain files, linker scripts, startup files, `.vscode/`, `.clangd`, `.clang-tidy`, flash/debug scripts, Dockerfile, CI workflows, and local docs before editing.
    - Omit `--host-platform` only when generating on the same machine where the project will be developed; the script will auto-detect that host.
 
@@ -91,3 +92,4 @@ If `clang-format`, `clang-tidy`, `arm-none-eabi-gcc`, OpenOCD, or hardware is un
 
 - Read `references/embedded-project-blueprint.md` when choosing directory layout, CMake/toolchain settings, STM32 software layers, flashing/debug flow, or CI design.
 - Read the scaffold script before changing generated linker/startup defaults, supported MCU arguments, or generated command entry points.
+- Read `assets/` before changing standard generated configuration files; treat those files as templates and keep board-, MCU-, probe-, and project-specific values behind `@PLACEHOLDER@` variables.

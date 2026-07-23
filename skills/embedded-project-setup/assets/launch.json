@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug @TARGET@ (@MCU@)",
+      "type": "cortex-debug",
+      "request": "launch",
+      "servertype": "openocd",
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/stm32-debug/@TARGET@.elf",
+      "device": "@MCU_UPPER@",
+      "runToEntryPoint": "main",
+      "configFiles": [
+        "interface/@OPENOCD_INTERFACE@.cfg",
+        "target/@OPENOCD_TARGET@.cfg"
+      ],
+      "preLaunchTask": "stm32: build"
+    }
+  ]
+}

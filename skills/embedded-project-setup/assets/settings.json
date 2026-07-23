@@ -1,0 +1,18 @@
+{
+  "cmake.useCMakePresets": "always",
+  "cmake.configureOnOpen": true,
+  "cmake.configurePreset": "stm32-debug",
+  "cmake.buildPreset": "stm32-debug",
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "C_Cpp.autocomplete": "disabled",
+  "clangd.arguments": [
+    "--background-index",
+    "--clang-tidy",
+    "--query-driver=**/arm-none-eabi-*",
+    "--compile-commands-dir=${workspaceFolder}/build/@CLANGD_PRESET@"
+  ],
+  "files.associations": {
+    "*.h": "c",
+    "*.s": "asm"
+  }
+}

@@ -60,12 +60,28 @@ project/
   tests/
     test_health.py
   pyproject.toml
+  gunicorn.conf.py
+  Dockerfile
+  .dockerignore
+  docker-compose.yml
   .env.example
   .gitignore
   README.md
 ```
 
-Add `Dockerfile`, `.dockerignore`, `docker-compose.yml`, and `gunicorn.conf.py` only when requested or already part of the service's deployment model.
+Generate `Dockerfile`, `.dockerignore`, `docker-compose.yml`, and `gunicorn.conf.py` for greenfield services by default.
+
+## Reusable Deployment Templates
+
+Keep stable generated deployment configuration in `assets/` and render it through the scaffold script:
+
+- `Dockerfile`
+- `.dockerignore`
+- `docker-compose.yml`
+- `gunicorn.conf.py`
+- `pyproject.toml`
+
+Use `@PLACEHOLDER@` values for service package names, ports, Python version, and container commands. Do not copy database wallets, bind mounts, project-specific image names, external secrets, or deprecated Gunicorn worker classes into the generic templates.
 
 ## App Composition
 
@@ -112,10 +128,9 @@ Default middleware should be minimal:
 Current deployment docs support several valid paths:
 
 - Local development: `uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload`.
-- Simple production or platform-managed process: `uvicorn app.main:app --host 0.0.0.0 --port 8000`.
-- Multiple workers without Gunicorn: `uvicorn app.main:app --workers 4`.
-- Containers/Kubernetes: usually one Uvicorn/FastAPI process per container, with replication handled by the platform.
-- Gunicorn: use the external `uvicorn-worker` package. Do not use new scaffolds that import or configure `uvicorn.workers.UvicornWorker`, because Uvicorn documents that module as deprecated.
+- Simple local smoke test: `uvicorn app.main:app --host 0.0.0.0 --port 8000`.
+- Production and container default: use Gunicorn with the external `uvicorn-worker` package, for example `gunicorn -c gunicorn.conf.py app.main:app`.
+- Do not use new scaffolds that import or configure `uvicorn.workers.UvicornWorker`, because Uvicorn documents that module as deprecated.
 
 ## Dependency Policy
 
@@ -125,6 +140,8 @@ Default runtime dependencies:
 fastapi
 uvicorn[standard]
 pydantic-settings
+gunicorn
+uvicorn-worker
 ```
 
 Default development dependencies:
@@ -134,12 +151,7 @@ pytest
 httpx
 ```
 
-Only add these when their deployment path is used:
-
-```text
-gunicorn
-uvicorn-worker
-```
+Do not pin Python dependency versions in generated `pyproject.toml`; let pip resolve the latest compatible releases for the selected Python runtime.
 
 ## Validation
 

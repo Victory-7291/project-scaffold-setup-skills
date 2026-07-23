@@ -11,7 +11,6 @@ This README is a catalog of the available skills. Each skill is designed to help
 | `cpp-project-setup` | Host-side C++ applications and libraries on macOS, Linux, or Windows. Use it for new C++ projects, existing CMake modernization, VS Code setup, vcpkg/CMake presets, testing, formatting, linting, documentation, and reproducible developer workflows. | CMake, CMake Presets, vcpkg manifest mode, Ninja, Clang/GCC/MSVC profiles, GoogleTest, clangd, clang-format, clang-tidy, Doxygen, VS Code debug settings, and CI-ready structure. |
 | `embedded-project-setup` | STM32/Cortex-M embedded C firmware projects. Use it for new firmware scaffolds, existing firmware modernization, cross CMake toolchains, linker/startup files, OpenOCD flashing, Cortex-Debug setup, and embedded CI. | CMake, Ninja, `arm-none-eabi-gcc/gdb`, STM32 firmware outputs, linker scripts, startup code, OpenOCD, ST-Link/J-Link workflows, Cortex-Debug, clangd, clang-format, clang-tidy, Docker/GitHub Actions-ready structure, and layered CMSIS/HAL/LL or bare-metal organization. |
 | `python-fastapi-setup` | Python FastAPI services and APIs. Use it for new FastAPI scaffolds, existing single-file or wrapper-launched app modernization, typed settings, lifespan-managed resources, middleware, routers, tests, and deployment commands. | `app/main.py`, versioned API routers, pydantic-settings, lifespan plus `app.state` dependency accessors, request ID/CORS middleware, `/health`, pytest/TestClient, Uvicorn/FastAPI CLI, optional Docker/Compose, and optional Gunicorn via `uvicorn-worker`. |
-| `java-spring-setup` | Java Spring Boot services and APIs. Use it for new Spring Boot scaffolds, existing Spring repo modernization, Maven/Web MVC setup, typed configuration, validation, Actuator, database-backed services, tests, observability, and deployment files. | Maven, Java 21 defaults, Spring Boot 4.x, Web MVC, validation, `@ConfigurationProperties`, Actuator health/info/metrics, structured production logging, MockMvc tests, optional PostgreSQL/Flyway/Testcontainers, optional Docker/Compose, and CI-ready structure. |
 
 ## What The Skills Do
 
@@ -60,13 +59,6 @@ npx skills add Victory-7291/project-scaffold-setup-skills \
   --skill python-fastapi-setup
 ```
 
-Install only the Java Spring setup skill:
-
-```bash
-npx skills add Victory-7291/project-scaffold-setup-skills \
-  --skill java-spring-setup
-```
-
 ## Example Prompts
 
 Use `cpp-project-setup` when asking an agent for host-side C++ work:
@@ -87,12 +79,6 @@ Use `python-fastapi-setup` when asking an agent for FastAPI service work:
 Use $python-fastapi-setup to scaffold a FastAPI service named inventory_api with typed settings, lifespan-managed resources, request ID middleware, /health, tests, and Docker Compose.
 ```
 
-Use `java-spring-setup` when asking an agent for Java Spring service work:
-
-```text
-Use $java-spring-setup to scaffold a Spring Boot service named orders-service with Maven, Java 21, Web MVC, typed configuration, validation, Actuator health/info, MockMvc tests, and optional PostgreSQL plus Docker Compose.
-```
-
 ## Skill Behavior At A Glance
 
 | Skill | Greenfield Default | Existing Project Behavior | Validation Focus |
@@ -100,7 +86,6 @@ Use $java-spring-setup to scaffold a Spring Boot service named orders-service wi
 | `cpp-project-setup` | App plus reusable library target, C++20, vcpkg, GoogleTest, format/lint/docs, VS Code integration. | Inventory the current build, dependency, editor, test, lint, docs, CI, and packaging setup before making scoped changes. | CMake presets, vcpkg bootstrap, build, `ctest`, formatting, clang-tidy, and docs generation when tools are available. |
 | `embedded-project-setup` | Minimal STM32/Cortex-M firmware scaffold with CMake presets, cross toolchain, startup/linker files, smoke code, flash/debug entry points. | Inspect existing firmware layers, build scripts, toolchain files, linker/startup flow, vendor model, debug scripts, editor settings, and CI before editing. | Configure/build, firmware artifacts, formatting, static analysis, and optional hardware flashing/debug validation when hardware is attached. |
 | `python-fastapi-setup` | Minimal FastAPI service with app factory, versioned routers, typed settings, request ID middleware, health check, tests, and optional Docker files. | Inspect existing ASGI entrypoints, route contracts, settings, middleware, dependency manager, tests, and startup commands before preserving behavior in a standard layout. | Python compile/import checks, pytest, Uvicorn health smoke, optional Gunicorn smoke, and optional Docker build/run health checks. |
-| `java-spring-setup` | Minimal Spring Boot service with Maven, Web MVC, typed config, validation, Actuator, profiles, and tests; optional PostgreSQL and Docker. | Inspect existing Spring version, Java/build tool, endpoint contracts, config, data, security, observability, tests, and deployment files before preserving behavior in a standard layout. | Python scaffold compile/help, generated project smoke, Maven tests when dependencies are available, Actuator health smoke, optional Docker/Compose and Testcontainers checks. |
 
 ## License
 
