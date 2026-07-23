@@ -1,6 +1,6 @@
 ---
 name: python-fastapi-setup
-description: Create, standardize, or modernize Python FastAPI service projects with `app/main.py`, versioned API routers, pydantic-settings configuration, lifespan-managed `app.state` services, dependency accessors, request ID/CORS middleware, health checks, pytest/TestClient tests, direct Uvicorn local startup, default Gunicorn production via `uvicorn-worker`, and default Docker/Compose deployment files. Use whenever the user asks to scaffold a FastAPI API/service, clean up single-file or wrapper-launched FastAPI code, add settings/middleware/routers/tests/deployment files, or prepare a Python web service for local development and production operation. Prefer another skill for non-Python APIs, Flask/Django-only projects, frontend-only work, or database-specific Supabase tasks.
+description: "FastAPI service setup: app/main.py, API routers, pydantic-settings, lifespan/app.state services, middleware, health checks, pytest/TestClient, Uvicorn, Gunicorn/uvicorn-worker, Docker/Compose. Use for scaffolding or modernizing Python API services; skip for Flask/Django-only, frontend-only, non-Python APIs, or Supabase-specific work."
 ---
 
 # Python FastAPI Setup

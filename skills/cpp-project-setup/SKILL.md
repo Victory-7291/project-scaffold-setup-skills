@@ -1,6 +1,6 @@
 ---
 name: cpp-project-setup
-description: Create, modify or improve modern C++ CMake projects with platform-aware toolchains for macOS/Linux/Windows on arm64 or x64, Git/GitHub, VS Code, CMake Tools, clangd, CodeLLDB on macOS/Linux, cppvsdbg on Windows, CMakePresets.json, vcpkg manifest mode, Ninja, Clang/GCC/MSVC, GoogleTest, clang-format, clang-tidy, Doxygen, and CI-ready structure. Use when users is asked to bootstrap a new C++ app/library, inspect and modernize an existing C++ project, create VS Code C++ settings, add vcpkg/CMake presets, or establish tests/lint/format/docs/reproducible developer workflow. Prefer embedded-project-setup for MCU firmware, OpenOCD, startup/linker scripts, arm-none-eabi, or Cortex-Debug tasks.
+description: "Modern C++ project setup: CMake/CMakePresets, vcpkg, Ninja, VS Code/clangd, GoogleTest, clang-format/tidy, Doxygen, CI, macOS/Linux/Windows. Use for bootstrapping or modernizing host-side C++ apps and libraries; prefer embedded-project-setup for MCU firmware and cross-debug flows."
 ---
 
 # Modern C++ Project Setup

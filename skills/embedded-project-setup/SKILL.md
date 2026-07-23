@@ -1,6 +1,6 @@
 ---
 name: embedded-project-setup
-description: Create, modify or improve modern embedded firmware projects for STM32, ESP32, AVR, RP2040, Nordic nRF, Zephyr/RTOS, and other MCU targets while pinning the right vendor firmware package or SDK first, then sharing a consistent VS Code, clangd, clang-format, clang-tidy, CMakePresets.json, Ninja, firmware artifact, Docker, and GitHub Actions development workflow where the target ecosystem supports it. Use when users ask to bootstrap MCU firmware, replace or complement CubeMX/vendor IDE output, inspect or modernize an existing bare-metal, vendor SDK, Arduino-style, ESP-IDF, Pico SDK, Zephyr, FreeRTOS, CMSIS/HAL/LL, nrfx, or RTOS firmware repo, create cross CMake toolchains, editor configs, flashing/debug scripts, linker/startup files, portable BSP smoke code, vendor SDK directories, west manifests, or embedded CI. Prefer cpp-project-setup for host-side C++ app/library projects.
+description: "Embedded firmware setup: STM32, ESP32, AVR, RP2040, Nordic nRF, Zephyr/RTOS, vendor SDKs, CMake/CMakePresets, VS Code/clangd, cross toolchains, flash/debug, Docker/CI. Use for MCU scaffolds, existing firmware modernization, BSPs, linker/startup files, SDK package selection, and embedded CI; prefer cpp-project-setup for host-side C++."
 ---
 
 # Modern Embedded Project Setup
